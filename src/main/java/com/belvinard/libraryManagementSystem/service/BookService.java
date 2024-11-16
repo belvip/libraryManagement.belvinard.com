@@ -8,6 +8,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 @Service
 public class BookService {
 
@@ -30,5 +34,9 @@ public class BookService {
         }
     }
 
-
+    // Méthode pour récupérer tous les livres
+    public List<Book> getAllBooks() {
+        // Appel à la méthode de LibraryData pour récupérer tous les livres
+        return new ArrayList<>(libraryData.getAllBooks());
+    }
 }

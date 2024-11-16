@@ -38,8 +38,8 @@ public class LibraryData {
         }
     }
 
-    /* Méthode pour afficher les livres (facultative, pour tester facilement)
+    // Méthode pour afficher les livres
     public Collection<Book> getAllBooks() {
-        return bookCollection.values();
-    }*/
+        return bookCollection.values(); // Retourne toutes les valeurs de la map (tous les livres)
+    }
 }

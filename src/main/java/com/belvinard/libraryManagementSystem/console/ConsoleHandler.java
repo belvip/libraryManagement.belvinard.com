@@ -40,7 +40,9 @@ public class ConsoleHandler {
                 case 1:
                     addBook();
                     break;
-
+                case 2:
+                    displayAllBooks();  // Afficher tous les livres
+                    break;
                 case 7:
                     running = false;
                     System.out.println("Exiting the system...");
@@ -77,6 +79,7 @@ public class ConsoleHandler {
         System.out.print("Enter your choice: ");
     }
 
+    /* ================================================ Method to add book =================================== */
     private void addBook() {
         System.out.print("Enter book title: ");
         String title = scanner.nextLine();
@@ -120,6 +123,23 @@ public class ConsoleHandler {
         }
     }
 
+    /* ================================================ Method to display all books =================================== */
 
+    public void displayAllBooks(){
+        List<Book> books = bookService.getAllBooks();
+
+        if(books.isEmpty()){
+            System.out.println("No books have been added yet.");
+        }else {
+            System.out.println("\n================= List of Books =================");
+            for (Book book : books){
+                System.out.println(book);
+                System.out.println("-----------------------------------------------------");
+            }
+        }
+
+        // Afficher le nombre de livres dans la liste
+        System.out.println("\nNumber of books in the list: " + books.size());
+    }
 
 }
