@@ -24,16 +24,17 @@ public class LibraryData {
      */
     public void addBook(Book book) {
         if (book != null) {
-            // Vérifier si un livre avec le même ISBN existe déjà
+            // Vérifier si l'ISBN existe déjà
             if (bookCollection.containsKey(book.getISBN())) {
+                // Log l'exception
+                logger.error("Failed to add book: A book with ISBN {} already exists.", book.getISBN());
+                // Lever l'exception si l'ISBN existe déjà
                 throw new BookAlreadyExistsException("A book with ISBN " + book.getISBN() + " already exists.");
             }
 
             // Ajouter le livre à la collection
             bookCollection.put(book.getISBN(), book);
             logger.info("Book with ISBN {} added successfully.", book.getISBN());
-        } else {
-            logger.warn("Attempted to add a null book.");
         }
     }
 

@@ -19,22 +19,16 @@ public class BookService {
         this.libraryData = libraryData;
     }
 
-    /**
-     * Ajoute un livre dans la bibliothèque.
-     * Si un conflit d'ISBN est détecté, l'erreur est capturée et loggée.
-     *
-     * @param book le livre à ajouter
-     * @return true si le livre est ajouté, false sinon
-     */
-    public boolean addBook(Book book) {
+
+    public void addBook(Book book) {
         try {
-            libraryData.addBook(book);
-            logger.info("Book successfully added: ISBN = {}, Title = {}", book.getISBN(), book.getTitle());
-            return true; // Livre ajouté avec succès
+            libraryData.addBook(book); // Appel à la méthode dans LibraryData
         } catch (BookAlreadyExistsException e) {
-            // Gérer l'exception ici
             logger.error("Failed to add book: {}", e.getMessage());
-            return false; // Livre non ajouté à cause du conflit
+            // Propager l'exception après l'avoir loggée
+            throw e;
         }
     }
+
+
 }

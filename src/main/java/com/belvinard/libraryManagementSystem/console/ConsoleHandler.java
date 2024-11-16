@@ -106,14 +106,16 @@ public class ConsoleHandler {
             book.setISBN(isbn);
             book.setPublicationYear(year);
 
-            // Tenter d'ajouter le livre
-            bookService.addBook(book);
+            // Ajouter le livre via le service
+            bookService.addBook(book); // Cela appelle la méthode dans BookService
+
+            // Ce message ne sera affiché que si l'exception n'est pas lancée
             System.out.println("Book added successfully.");
         } catch (com.belvinard.libraryManagementSystem.exception.BookAlreadyExistsException e) {
-            // Gestion du conflit d'ISBN
+            // Si l'ISBN est déjà utilisé
             System.out.println("Error: A book with ISBN " + isbn + " already exists. Please use a unique ISBN.");
         } catch (IllegalArgumentException e) {
-            // Autre erreur potentielle
+            // Autre exception
             System.out.println("Error: " + e.getMessage());
         }
     }
