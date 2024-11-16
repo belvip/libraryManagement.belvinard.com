@@ -83,6 +83,68 @@ public class ConsoleHandler {
     private void addBook() {
         System.out.print("Enter book title: ");
         String title = scanner.nextLine();
+
+        System.out.print("Enter book author: ");
+        String author = scanner.nextLine();
+
+        System.out.print("Enter book genre: ");
+        String genre = scanner.nextLine();
+
+        String isbn = "";
+        boolean validIsbn = false;
+        while (!validIsbn) {
+            System.out.print("Enter book ISBN: ");
+            isbn = scanner.nextLine();
+            // Vérifier que l'ISBN n'est pas vide
+            if (isbn.isEmpty()) {
+                System.out.println("ISBN cannot be empty. Please enter a valid ISBN.");
+            } else {
+                validIsbn = true;
+            }
+        }
+
+        int year = 0;
+        boolean validYear = false;
+        while (!validYear) {
+            System.out.print("Enter publication year: ");
+            try {
+                year = scanner.nextInt();  // Attente d'un entier pour l'année
+                scanner.nextLine();  // Consommer la nouvelle ligne restante
+                validYear = true;  // L'année est valide, on sort de la boucle
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input. Please enter a valid number for the year.");
+                scanner.nextLine();  // Consommer l'entrée invalide pour éviter la boucle infinie
+            }
+        }
+
+        System.out.println("\n========= Details Book entered : ========== \n");
+        System.out.println("Book Title: " + title);
+        System.out.println("Book Author: " + author);
+        System.out.println("Book Genre: " + genre);
+        System.out.println("Book ISBN: " + isbn);
+        System.out.println("Book Year: " + year);
+
+        try {
+            Book book = new Book();
+            book.setTitle(title);
+            book.setAuthor(author);
+            book.setGenre(genre);
+            book.setISBN(isbn);
+            book.setPublicationYear(year);
+            bookService.addBook(book);  // Ajouter le livre via le service
+            System.out.println("Book added successfully.");
+        } catch (com.belvinard.libraryManagementSystem.exception.BookAlreadyExistsException e) {
+            // Si l'ISBN est déjà utilisé
+            System.out.println("Error: A book with ISBN " + isbn + " already exists. Please use a unique ISBN.");
+        } catch (IllegalArgumentException e) {
+            // Autre exception
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+   /* private void addBook() {
+        System.out.print("Enter book title: ");
+        String title = scanner.nextLine();
         System.out.print("Enter book author: ");
         String author = scanner.nextLine();
         System.out.print("Enter book genre: ");
@@ -121,7 +183,7 @@ public class ConsoleHandler {
             // Autre exception
             System.out.println("Error: " + e.getMessage());
         }
-    }
+    } */
 
     /* ================================================ Method to display all books =================================== */
 
