@@ -46,6 +46,9 @@ public class ConsoleHandler {
                 case 3:
                     updateBook();  // Mettre à jour un livre
                     break;
+                case 4:
+                    removeBookByISBN() ;  // Mettre à jour un livre
+                    break;
                 case 7:
                     running = false;
                     System.out.println("Exiting the system...");
@@ -165,6 +168,21 @@ public class ConsoleHandler {
         System.out.println("\nNumber of books in the list: " + books.size());
     }
 
+    // Afficher un livre par son ISBN
+    private void displayBookByISBN() {
+        System.out.print("Enter the ISBN of the book to display: ");
+        String isbn = scanner.nextLine();
+
+        try {
+            Book book = bookService.getBookByISBN(isbn);
+            System.out.println("\nBook details:");
+            System.out.println(book);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+
     /* ================================================ Method to update books =================================== */
     private void updateBook() {
         System.out.print("Enter the ISBN of the book to update: ");
@@ -195,6 +213,36 @@ public class ConsoleHandler {
             // Appeler la méthode de mise à jour
             bookService.updateBook(existingBook);
             System.out.println("Book updated successfully.");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+
+
+    }
+
+    /* ================================================ Method to remove books =================================== */
+
+    private void removeBookByISBN() {
+        System.out.print("Enter the ISBN of the book to remove: ");
+        String isbn = scanner.nextLine();
+
+        try {
+            // Récupérer le livre à supprimer pour afficher ses détails
+            Book book = bookService.getBookByISBN(isbn);
+            System.out.println("\nBook details:");
+            System.out.println(book);
+
+            // Demander confirmation
+            System.out.print("Are you sure you want to remove this book? (yes/no): ");
+            String confirmation = scanner.nextLine().trim().toLowerCase();
+
+            if (confirmation.equals("yes")) {
+                bookService.deleteBookByISBN(isbn);
+                System.out.println("The book has been successfully removed.");
+            } else {
+                System.out.println("The book was not removed.");
+            }
+
         } catch (IllegalArgumentException e) {
             System.out.println("Error: " + e.getMessage());
         }

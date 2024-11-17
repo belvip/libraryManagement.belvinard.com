@@ -61,4 +61,18 @@ public class BookService {
         }
     }
 
+    /* ===================================== Method to remove book  ===================================== */
+
+    public Book deleteBookByISBN(String isbn) {
+        try {
+            Book removedBook = libraryData.deleteBookByISBN(isbn);
+            logger.info("Book with ISBN {} removed successfully.", isbn);
+            return removedBook;
+        } catch (IllegalArgumentException e) {
+            logger.error("Failed to remove book with ISBN {}: {}", isbn, e.getMessage());
+            throw e; // Renvoyer l'exception pour qu'elle soit gérée plus haut
+        }
+    }
+
+
 }

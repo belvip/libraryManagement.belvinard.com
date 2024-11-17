@@ -82,6 +82,22 @@ public class LibraryData {
         logger.info("Book with ISBN {} updated successfully.", updatedBook.getISBN());
     }
 
+    /* ========================== Supprimer un livre ========================== */
+
+    public Book deleteBookByISBN(String isbn) {
+        if (isbn == null || isbn.isEmpty()) {
+            throw new IllegalArgumentException("ISBN cannot be null or empty.");
+        }
+
+        if (!bookCollection.containsKey(isbn)) {
+            throw new IllegalArgumentException("No book found with ISBN " + isbn);
+        }
+
+        // Supprime le livre et retourne l'objet du livre supprimé
+        return bookCollection.remove(isbn);
+    }
+
+
 
 
 }
