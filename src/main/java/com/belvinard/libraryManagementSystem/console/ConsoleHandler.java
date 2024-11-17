@@ -43,6 +43,9 @@ public class ConsoleHandler {
                 case 2:
                     displayAllBooks();  // Afficher tous les livres
                     break;
+                case 3:
+                    updateBook();  // Mettre à jour un livre
+                    break;
                 case 7:
                     running = false;
                     System.out.println("Exiting the system...");
@@ -161,5 +164,41 @@ public class ConsoleHandler {
         // Afficher le nombre de livres dans la liste
         System.out.println("\nNumber of books in the list: " + books.size());
     }
+
+    /* ================================================ Method to update books =================================== */
+    private void updateBook() {
+        System.out.print("Enter the ISBN of the book to update: ");
+        String isbn = scanner.nextLine();
+
+        // Vérifiez si le livre existe
+        try {
+            Book existingBook = bookService.getBookByISBN(isbn);
+            System.out.println("\nExisting book details:");
+            System.out.println(existingBook);
+
+            System.out.print("Enter new title (leave blank to keep current): ");
+            String newTitle = scanner.nextLine();
+            System.out.print("Enter new author (leave blank to keep current): ");
+            String newAuthor = scanner.nextLine();
+            System.out.print("Enter new genre (leave blank to keep current): ");
+            String newGenre = scanner.nextLine();
+            System.out.print("Enter new publication year (enter 0 to keep current): ");
+            int newYear = scanner.nextInt();
+            scanner.nextLine(); // Consommer la ligne restante
+
+            // Mettez à jour uniquement les champs modifiés
+            if (!newTitle.isEmpty()) existingBook.setTitle(newTitle);
+            if (!newAuthor.isEmpty()) existingBook.setAuthor(newAuthor);
+            if (!newGenre.isEmpty()) existingBook.setGenre(newGenre);
+            if (newYear != 0) existingBook.setPublicationYear(newYear);
+
+            // Appeler la méthode de mise à jour
+            bookService.updateBook(existingBook);
+            System.out.println("Book updated successfully.");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
 
 }

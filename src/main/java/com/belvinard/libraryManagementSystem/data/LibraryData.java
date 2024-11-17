@@ -42,4 +42,46 @@ public class LibraryData {
     public Collection<Book> getAllBooks() {
         return bookCollection.values(); // Retourne toutes les valeurs de la map (tous les livres)
     }
+
+
+     /* ========================== Mettre à jour un livre ========================== */
+
+    // Rechercher un livre par son ISBN
+     public Book getBookByISBN(String isbn) {
+         if (isbn == null || isbn.isEmpty()) {
+             throw new IllegalArgumentException("ISBN cannot be null or empty.");
+         }
+
+         if (!bookCollection.containsKey(isbn)) {
+             throw new IllegalArgumentException("No book found with ISBN " + isbn);
+         }
+
+         return bookCollection.get(isbn);
+     }
+
+    // Méthode pour mettre à jour un livre
+
+    // Méthode pour récupérer un livre par son ISBN
+    public void updateBook(Book updatedBook) {
+        if (updatedBook == null) {
+            throw new IllegalArgumentException("The updated book object cannot be null.");
+        }
+
+        if (updatedBook.getISBN() == null || updatedBook.getISBN().isEmpty()) {
+            throw new IllegalArgumentException("The ISBN of the updated book cannot be null or empty.");
+        }
+
+        if (!bookCollection.containsKey(updatedBook.getISBN())) {
+            throw new IllegalArgumentException("No book found with ISBN " + updatedBook.getISBN());
+        }
+
+        // Mettre à jour le livre dans la collection
+        bookCollection.put(updatedBook.getISBN(), updatedBook);
+
+        // Log de confirmation
+        logger.info("Book with ISBN {} updated successfully.", updatedBook.getISBN());
+    }
+
+
+
 }

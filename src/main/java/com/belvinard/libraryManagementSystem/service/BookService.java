@@ -43,4 +43,22 @@ public class BookService {
     }
 
     /* ===================================== Method to update book  ===================================== */
+    public void updateBook(Book updatedBook) {
+        try {
+            libraryData.updateBook(updatedBook);
+        } catch (IllegalArgumentException e){
+            logger.error("Failed to update book : {}", e.getMessage());
+            throw e;
+        }
+    }
+
+    public Book getBookByISBN(String isbn) {
+        try {
+            return libraryData.getBookByISBN(isbn);
+        } catch (IllegalArgumentException e) {
+            logger.error("Failed to find book with ISBN {}: {}", isbn, e.getMessage());
+            throw e; // Vous pouvez relancer l'exception pour la gérer plus haut
+        }
+    }
+
 }
