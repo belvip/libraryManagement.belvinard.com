@@ -49,6 +49,9 @@ public class ConsoleHandler {
                 case 4:
                     removeBookByISBN() ;  // Mettre à jour un livre
                     break;
+                case 5:
+                    searchBooks();  // Mettre à jour un livre
+                    break;
                 case 7:
                     running = false;
                     System.out.println("Exiting the system...");
@@ -247,6 +250,68 @@ public class ConsoleHandler {
             System.out.println("Error: " + e.getMessage());
         }
     }
+
+    /* ================================================ Methods to search books =================================== */
+
+    private void searchBooks() {
+        System.out.println("Choose search type:");
+        System.out.println("1. Linear Search");
+        System.out.println("2. Binary Search");
+        System.out.print("Enter your choice: ");
+        int searchType = scanner.nextInt();
+        scanner.nextLine(); // Consommer la ligne restante
+
+        System.out.println("Search by:");
+        System.out.println("1. Title");
+        System.out.println("2. Author");
+        System.out.println("3. Genre");
+        System.out.println("4. ISBN");
+        System.out.print("Enter your choice: ");
+        int searchFieldChoice = scanner.nextInt();
+        scanner.nextLine(); // Consommer la ligne restante
+
+        String searchField;
+        switch (searchFieldChoice) {
+            case 1:
+                searchField = "title";
+                break;
+            case 2:
+                searchField = "author";
+                break;
+            case 3:
+                searchField = "genre";
+                break;
+            case 4:
+                searchField = "isbn";
+                break;
+            default:
+                System.out.println("Invalid choice. Returning to menu.");
+                return;
+        }
+
+        System.out.print("Enter the search query: ");
+        String query = scanner.nextLine();
+
+        List<Book> result;
+        if (searchType == 1) {
+            result = bookService.linearSearchBooks(query, searchField);
+        } else if (searchType == 2) {
+            result = bookService.binarySearchBooks(query, searchField);
+        } else {
+            System.out.println("Invalid search type. Returning to menu.");
+            return;
+        }
+
+        if (result.isEmpty()) {
+            System.out.println("No books found matching the query.");
+        } else {
+            System.out.println("\nSearch Results:");
+            for (Book book : result) {
+                System.out.println(book);
+            }
+        }
+    }
+
 
 
 }

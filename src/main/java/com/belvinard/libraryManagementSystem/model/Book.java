@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import static com.belvinard.libraryManagementSystem.console.ConsoleHandler.books;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,6 +26,10 @@ public class Book {
             "full-stack development", "" +
                     ""
     );
+
+    public Book(String fieldValue) {
+        this.title = fieldValue; // Ce champ est utilisé pour la recherche.
+    }
 
 
 
