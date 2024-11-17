@@ -23,6 +23,7 @@ public class BookService {
         this.libraryData = libraryData;
     }
 
+    /* ===================================== Method to add book  ===================================== */
 
     public void addBook(Book book) {
         try {
@@ -34,9 +35,12 @@ public class BookService {
         }
     }
 
+    /* ===================================== Method to display all books  ===================================== */
     // Méthode pour récupérer tous les livres
     public List<Book> getAllBooks() {
         // Appel à la méthode de LibraryData pour récupérer tous les livres
         return new ArrayList<>(libraryData.getAllBooks());
     }
+
+    /* ===================================== Method to update book  ===================================== */
 }

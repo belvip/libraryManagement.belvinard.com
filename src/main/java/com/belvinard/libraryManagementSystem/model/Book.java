@@ -21,7 +21,8 @@ public class Book {
     // Allowed genres for validation (modifiable via configuration in the future)
     private static final Set<String> ALLOWED_GENRES = Set.of(
             "front-end development", "web design", "software development",
-            "full-stack development", "back-end development"
+            "full-stack development", "" +
+                    ""
     );
 
 

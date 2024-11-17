@@ -142,48 +142,6 @@ public class ConsoleHandler {
         }
     }
 
-   /* private void addBook() {
-        System.out.print("Enter book title: ");
-        String title = scanner.nextLine();
-        System.out.print("Enter book author: ");
-        String author = scanner.nextLine();
-        System.out.print("Enter book genre: ");
-        String genre = scanner.nextLine();
-        System.out.print("Enter book ISBN: ");
-        String isbn = scanner.nextLine();
-        System.out.print("Enter publication year: ");
-        int year = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
-
-        System.out.println("\n========= Details Book entered : ========== \n");
-        System.out.println("Book Title: " + title);
-        System.out.println("Book Author: " + author);
-        System.out.println("Book Genre: " + genre);
-        System.out.println("Book ISBN: " + isbn);
-        System.out.println("Book Year: " + year);
-
-        try {
-            // Créer un objet Book
-            Book book = new Book();
-            book.setTitle(title);
-            book.setAuthor(author);
-            book.setGenre(genre);
-            book.setISBN(isbn);
-            book.setPublicationYear(year);
-
-            // Ajouter le livre via le service
-            bookService.addBook(book); // Cela appelle la méthode dans BookService
-
-            // Ce message ne sera affiché que si l'exception n'est pas lancée
-            System.out.println("Book added successfully.");
-        } catch (com.belvinard.libraryManagementSystem.exception.BookAlreadyExistsException e) {
-            // Si l'ISBN est déjà utilisé
-            System.out.println("Error: A book with ISBN " + isbn + " already exists. Please use a unique ISBN.");
-        } catch (IllegalArgumentException e) {
-            // Autre exception
-            System.out.println("Error: " + e.getMessage());
-        }
-    } */
 
     /* ================================================ Method to display all books =================================== */
 
