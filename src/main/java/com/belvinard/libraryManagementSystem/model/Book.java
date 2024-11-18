@@ -19,6 +19,23 @@ public class Book {
     private String genre;
     private String ISBN;
     private int publicationYear;
+    private boolean isAvailable;  // Détermine si le livre est disponible ou non
+
+    public boolean isAvailable() {
+        return isAvailable;
+    }
+
+    public void setAvailable(boolean available) {
+        isAvailable = available;
+    }
+
+    public void markAsBorrowed() {
+        this.isAvailable = false; // Marque le livre comme emprunté
+    }
+
+    public void markAsReturned() {
+        this.isAvailable = true; // Marque le livre comme retourné
+    }
 
     // Allowed genres for validation (modifiable via configuration in the future)
     private static final Set<String> ALLOWED_GENRES = Set.of(

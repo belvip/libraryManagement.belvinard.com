@@ -4,11 +4,13 @@ import com.belvinard.libraryManagementSystem.console.ConsoleHandler;
 import com.belvinard.libraryManagementSystem.data.LibraryData;
 import com.belvinard.libraryManagementSystem.service.BookService;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.Scanner;
 
 @Configuration  // Indique que cette classe contient des configurations Spring
+@ComponentScan(basePackages = "com.belvinard.libraryManagementSystem")
 public class AppConfig {
 
     @Bean

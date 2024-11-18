@@ -6,14 +6,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class LibraryData {
 
-    public static final Logger logger = LoggerFactory.getLogger(LibraryData.class);
+    private static final Logger logger = LoggerFactory.getLogger(LibraryData.class);
 
-    // HashMap pour stocker les livres, avec l'ISBN comme clé pour un accès rapide
+    // HashMap pour stocker les livres avec l'ISBN comme clé
     private Map<String, Book> bookCollection = new HashMap<>();
 
     /**
@@ -23,81 +25,81 @@ public class LibraryData {
      * @throws BookAlreadyExistsException si un livre avec le même ISBN existe déjà
      */
     public void addBook(Book book) {
-        if (book != null) {
-            // Vérifier si l'ISBN existe déjà
-            if (bookCollection.containsKey(book.getISBN())) {
-                // Log l'exception
-                logger.error("Failed to add book: A book with ISBN {} already exists.", book.getISBN());
-                // Lever l'exception si l'ISBN existe déjà
-                throw new BookAlreadyExistsException("A book with ISBN " + book.getISBN() + " already exists.");
-            }
-
-            // Ajouter le livre à la collection
-            bookCollection.put(book.getISBN(), book);
-            logger.info("Book with ISBN {} added successfully.", book.getISBN());
+        if (book == null) {
+            throw new IllegalArgumentException("Book cannot be null.");
         }
+
+        // Vérifier si le livre existe déjà
+        if (bookCollection.containsKey(book.getISBN())) {
+            logger.error("Failed to add book: A book with ISBN {} already exists.", book.getISBN());
+            throw new BookAlreadyExistsException("A book with ISBN " + book.getISBN() + " already exists.");
+        }
+
+        // Ajouter le livre à la collection
+        bookCollection.put(book.getISBN(), book);
+        logger.info("Book with ISBN {} added successfully.", book.getISBN());
     }
 
-    // Méthode pour afficher les livres
+    /**
+     * Récupère tous les livres de la collection.
+     *
+     * @return une collection de tous les livres
+     */
     public Collection<Book> getAllBooks() {
-        return bookCollection.values(); // Retourne toutes les valeurs de la map (tous les livres)
+        return bookCollection.values();
     }
 
+    /**
+     * Recherche un livre par son ISBN.
+     *
+     * @param isbn l'ISBN du livre à rechercher
+     * @return le livre trouvé ou null si non trouvé
+     */
+    public Book getBookByISBN(String isbn) {
+        if (isbn == null || isbn.isEmpty()) {
+            throw new IllegalArgumentException("ISBN cannot be null or empty.");
+        }
 
-     /* ========================== Mettre à jour un livre ========================== */
+        return bookCollection.get(isbn);
+    }
 
-    // Rechercher un livre par son ISBN
-     public Book getBookByISBN(String isbn) {
-         if (isbn == null || isbn.isEmpty()) {
-             throw new IllegalArgumentException("ISBN cannot be null or empty.");
-         }
-
-         if (!bookCollection.containsKey(isbn)) {
-             throw new IllegalArgumentException("No book found with ISBN " + isbn);
-         }
-
-         return bookCollection.get(isbn);
-     }
-
-    // Méthode pour mettre à jour un livre
-
-    // Méthode pour récupérer un livre par son ISBN
+    /**
+     * Met à jour un livre dans la collection.
+     *
+     * @param updatedBook le livre mis à jour
+     */
     public void updateBook(Book updatedBook) {
-        if (updatedBook == null) {
-            throw new IllegalArgumentException("The updated book object cannot be null.");
+        if (updatedBook == null || updatedBook.getISBN() == null || updatedBook.getISBN().isEmpty()) {
+            throw new IllegalArgumentException("Updated book or ISBN cannot be null.");
         }
 
-        if (updatedBook.getISBN() == null || updatedBook.getISBN().isEmpty()) {
-            throw new IllegalArgumentException("The ISBN of the updated book cannot be null or empty.");
-        }
-
+        // Vérifier si le livre existe dans la collection
         if (!bookCollection.containsKey(updatedBook.getISBN())) {
             throw new IllegalArgumentException("No book found with ISBN " + updatedBook.getISBN());
         }
 
         // Mettre à jour le livre dans la collection
         bookCollection.put(updatedBook.getISBN(), updatedBook);
-
-        // Log de confirmation
         logger.info("Book with ISBN {} updated successfully.", updatedBook.getISBN());
     }
 
-    /* ========================== Supprimer un livre ========================== */
-
+    /**
+     * Supprime un livre de la collection par son ISBN.
+     *
+     * @param isbn l'ISBN du livre à supprimer
+     * @return le livre supprimé
+     */
     public Book deleteBookByISBN(String isbn) {
         if (isbn == null || isbn.isEmpty()) {
             throw new IllegalArgumentException("ISBN cannot be null or empty.");
         }
 
-        if (!bookCollection.containsKey(isbn)) {
+        Book removedBook = bookCollection.remove(isbn);
+        if (removedBook == null) {
             throw new IllegalArgumentException("No book found with ISBN " + isbn);
         }
 
-        // Supprime le livre et retourne l'objet du livre supprimé
-        return bookCollection.remove(isbn);
+        logger.info("Book with ISBN {} removed successfully.", isbn);
+        return removedBook;
     }
-
-
-
-
 }
