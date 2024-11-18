@@ -35,6 +35,35 @@ public class UserService {
         System.out.println("User " + user.getUsername() + " added successfully.");
     }
 
+
+    public void displayAllUsers() {
+        if (users.isEmpty()) {
+            System.out.println("No users available.");
+            return;
+        }
+
+        // Afficher le nombre total d'utilisateurs
+        System.out.println("Total number of users: " + users.size());
+
+        // Itérer sur les entrées du Map (clé-valeur)
+        for (Map.Entry<String, User> entry : users.entrySet()) {
+            User user = entry.getValue();
+            System.out.println("\nUser details:");
+            System.out.println("Username: " + user.getUsername());
+            System.out.println("Full Name: " + user.getFullName());
+            System.out.println("Email: " + user.getEmail());
+            System.out.println("Phone Number: " + user.getPhoneNumber());
+            System.out.println("Address: " + user.getAddress());
+            System.out.println("Borrow Limit: " + user.getBorrowLimit());
+            System.out.println("Borrowed Books History: ");
+            for (Loan loan : user.getBorrowedBooksHistory()) {
+                System.out.println(loan);
+            }
+        }
+    }
+
+
+
     // Récupérer un utilisateur par son nom d'utilisateur
     public User getUserByUsername(String username) {
         User user = users.get(username);

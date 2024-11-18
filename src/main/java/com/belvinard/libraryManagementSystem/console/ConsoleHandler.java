@@ -70,12 +70,15 @@ public class ConsoleHandler {
                     updateUser();  // Mettre à jour un utilisateur
                     break;
                 case 10:
-                    deleteUser();  // Supprimer un utilisateur
+                    displayAllUsers();
                     break;
                 case 11:
-                    borrowBook();  // Emprunter un livre
+                    deleteUser();  // Supprimer un utilisateur
                     break;
                 case 12:
+                    borrowBook();  // Emprunter un livre
+                    break;
+                case 13:
                     running = false;
                     System.out.println("Exiting the system...");
                     break;
@@ -108,10 +111,11 @@ public class ConsoleHandler {
                         "Press 6 for Sorting Book \n" +
                         "Press 7 for Adding User \n" +
                         "Press 8 for Displaying User \n" +
-                        "Press 9 for Updating User \n" +
-                        "Press 10 for Deleting User \n" +
-                        "Press 11 for Borrowing Book \n" +
-                        "Press 12 for Exiting the portal\n"
+                        "Press 9 for Updating Users \n" +
+                        "Press 10 for Displaying All Users \n" +
+                        "Press 11 for Deleting User \n" +
+                        "Press 12 for Borrowing Book \n" +
+                        "Press 13 for Exiting the portal\n"
         );
         System.out.print("Enter your choice: ");
     }
@@ -572,6 +576,7 @@ public class ConsoleHandler {
         System.out.print("Enter the username of the user to update: ");
         String username = scanner.nextLine();
 
+
         try {
             User user = userService.getUserByUsername(username);
             System.out.println("Current details: " + user);
@@ -583,6 +588,10 @@ public class ConsoleHandler {
             System.out.print("Enter new email (leave blank to keep current): ");
             String email = scanner.nextLine();
             if (!email.isEmpty()) user.setEmail(email);
+
+            System.out.print("Enter new password (leave blank to keep current): ");
+            String password = scanner.nextLine();
+            if (!password.isEmpty()) user.setPassword(password);
 
             System.out.print("Enter new phone number (leave blank to keep current): ");
             String phoneNumber = scanner.nextLine();
@@ -611,6 +620,11 @@ public class ConsoleHandler {
             System.out.println("Error: " + e.getMessage());
         }
     }
+
+    private void displayAllUsers() {
+        userService.displayAllUsers();
+    }
+
 
 
 
