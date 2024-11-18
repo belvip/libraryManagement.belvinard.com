@@ -52,6 +52,9 @@ public class ConsoleHandler {
                 case 5:
                     searchBooks();  // Mettre à jour un livre
                     break;
+                case 6:
+                    sortBooks();  // Mettre à jour un livre
+                    break;
                 case 7:
                     running = false;
                     System.out.println("Exiting the system...");
@@ -293,6 +296,7 @@ public class ConsoleHandler {
         String query = scanner.nextLine();
 
         List<Book> result;
+
         if (searchType == 1) {
             result = bookService.linearSearchBooks(query, searchField);
         } else if (searchType == 2) {
@@ -309,6 +313,73 @@ public class ConsoleHandler {
             for (Book book : result) {
                 System.out.println(book);
             }
+        }
+    }
+
+    /* ================================================ Methods to sort books =================================== */
+
+    private void sortBooks() {
+        // Choisir le critère de tri
+        System.out.println("\nSelect sorting criterion:");
+        System.out.println("1. Sort by Title");
+        System.out.println("2. Sort by Author");
+        System.out.println("3. Sort by Year");
+        System.out.print("Enter your choice: ");
+        int criterionChoice = scanner.nextInt();
+        scanner.nextLine();  // Consume newline
+
+        // Déterminer le champ de tri
+        String sortBy = "";
+        switch (criterionChoice) {
+            case 1:
+                sortBy = "title";
+                break;
+            case 2:
+                sortBy = "author";
+                break;
+            case 3:
+                sortBy = "year";
+                break;
+            default:
+                System.out.println("Invalid choice. Defaulting to Title.");
+                sortBy = "title";
+                break;
+        }
+
+        // Choisir l'algorithme de tri
+        System.out.println("\nSelect sorting algorithm:");
+        System.out.println("1. Bubble Sort");
+        System.out.println("2. Selection Sort");
+        System.out.println("3. QuickSort");
+        System.out.print("Enter your choice: ");
+        int algorithmChoice = scanner.nextInt();
+        scanner.nextLine();  // Consume newline
+
+        // Récupérer les livres depuis le service
+        List<Book> books = new ArrayList<>(bookService.getAllBooks());
+
+        // Appliquer l'algorithme de tri sélectionné
+        switch (algorithmChoice) {
+            case 1:
+                bookService.bubbleSort(books, sortBy); // Bubble Sort
+                break;
+            case 2:
+                bookService.selectionSort(books, sortBy); // Selection Sort
+                break;
+            case 3:
+                bookService.quickSort(books, 0, books.size() - 1, sortBy); // Quick Sort
+                break;
+            default:
+                System.out.println("Invalid choice. Defaulting to Bubble Sort.");
+                bookService.bubbleSort(books, sortBy); // Bubble Sort par défaut
+                break;
+        }
+
+        // Afficher les livres triés
+        System.out.println("\nBooks sorted by " + sortBy + ":");
+        for (Book book : books) {
+            System.out.println(book);
+            System.out.println("----------------------------------------");
         }
     }
 
