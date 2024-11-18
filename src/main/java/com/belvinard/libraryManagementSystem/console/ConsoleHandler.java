@@ -324,6 +324,7 @@ public class ConsoleHandler {
         System.out.println("1. Sort by Title");
         System.out.println("2. Sort by Author");
         System.out.println("3. Sort by Year");
+        System.out.println("4. Sort by Genre");
         System.out.print("Enter your choice: ");
         int criterionChoice = scanner.nextInt();
         scanner.nextLine();  // Consume newline
@@ -339,6 +340,9 @@ public class ConsoleHandler {
                 break;
             case 3:
                 sortBy = "year";
+                break;
+            case 4:
+                sortBy = "genre";
                 break;
             default:
                 System.out.println("Invalid choice. Defaulting to Title.");

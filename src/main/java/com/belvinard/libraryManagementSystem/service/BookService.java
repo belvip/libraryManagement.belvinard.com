@@ -233,6 +233,8 @@ public class BookService {
                 return Comparator.comparing(Book::getAuthor, String.CASE_INSENSITIVE_ORDER);
             case "year":
                 return Comparator.comparingInt(Book::getPublicationYear);
+            case "genre":
+                return Comparator.comparing(Book::getGenre, String.CASE_INSENSITIVE_ORDER);
             default:
                 throw new IllegalArgumentException("Invalid sort field: " + sortBy);
         }
