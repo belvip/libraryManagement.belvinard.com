@@ -381,6 +381,9 @@ public class ConsoleHandler {
             System.out.println(book);
             System.out.println("----------------------------------------");
         }
+
+        // Afficher le nombre total de livres triés
+        System.out.println("Total number of books sorted: " + books.size());
     }
 
 
