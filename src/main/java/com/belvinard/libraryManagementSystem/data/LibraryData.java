@@ -1,10 +1,7 @@
 package com.belvinard.libraryManagementSystem.data;
 
 import com.belvinard.libraryManagementSystem.exception.BookAlreadyExistsException;
-import com.belvinard.libraryManagementSystem.exception.UserNotFoundException;
 import com.belvinard.libraryManagementSystem.model.Book;
-import com.belvinard.libraryManagementSystem.model.Loan;
-import com.belvinard.libraryManagementSystem.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -66,7 +63,27 @@ public class LibraryData {
         }
     }
 
+    public void borrowBook(String isbn) {
+        if (!bookCollection.containsKey(isbn)) {
+            throw new IllegalArgumentException("Error: Book with ISBN " + isbn + " not found.");
+        }
 
+        Book book = bookCollection.get(isbn);
+
+        if (book.getNumberOfCopies() <= 0) {
+            throw new IllegalArgumentException("Error: No copies available for this book.");
+        }
+
+        // Diminuez le nombre de copies et mettez à jour la disponibilité
+        book.setNumberOfCopies(book.getNumberOfCopies() - 1);
+        if (book.getNumberOfCopies() == 0) {
+            book.setAvailable(false); // Si plus de copies, indisponible
+        }
+
+        // Mettre à jour dans la collection (inutile si `book` est mutable)
+        bookCollection.put(isbn, book);
+        logger.info("Book with ISBN {} borrowed successfully. Remaining copies: {}", isbn, book.getNumberOfCopies());
+    }
 
     /**
      * Récupère tous les livres de la collection.
@@ -110,9 +127,6 @@ public class LibraryData {
         bookCollection.put(updatedBook.getISBN(), updatedBook);
         logger.info("Book with ISBN {} updated successfully.", updatedBook.getISBN());
     }
-
-
-
 
 
     /**

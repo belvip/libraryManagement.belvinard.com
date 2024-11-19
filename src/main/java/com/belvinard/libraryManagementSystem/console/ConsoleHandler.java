@@ -1,3 +1,4 @@
+
 package com.belvinard.libraryManagementSystem.console;
 
 import com.belvinard.libraryManagementSystem.data.LibraryData;
@@ -234,29 +235,50 @@ public class ConsoleHandler {
 
             // Afficher les livres de la page actuelle
             System.out.println("\n================= List of Books =================");
-            System.out.printf("%-15s %-30s %-20s %-15s %-10s %n",
-                    "ISBN", "Title", "Author", "Genre", "Available");
-            System.out.println("-------------------------------------------------------------------------");
+            System.out.printf("%-15s %-30s %-20s %-15s %-10s %-10s %n",
+                    "ISBN", "Title", "Author", "Genre", "Available", "Copies");
+            System.out.println("---------------------------------------------------------------------------------------");
             for (int i = startIndex; i < endIndex; i++) {
                 Book book = books.get(i);
-                System.out.printf("%-15s %-30s %-20s %-15s %-10s %n",
+                System.out.printf("%-15s %-30s %-20s %-15s %-10s %-10d %n",
                         book.getISBN(), book.getTitle(), book.getAuthor(), book.getGenre(),
-                        book.isAvailable() ? "Yes" : "No");
+                        book.isAvailable() ? "Yes" : "No", book.getNumberOfCopies());
             }
 
-            // Afficher les instructions de navigation
+            // Afficher les instructions de navigation et options supplémentaires
             System.out.printf("\nPage %d of %d%n", currentPage, totalPages);
-            System.out.println("Press 'n' for Next, 'p' for Previous, 'q' to Quit.");
+            System.out.println("Press 'n' for Next, 'p' for Previous, 'b' to Borrow a book, 'q' to Quit.");
 
             // Lire l'entrée utilisateur
             System.out.print("Your choice: ");
             userInput = scanner.nextLine().trim().toLowerCase();
 
-            // Naviguer entre les pages
             if (userInput.equals("n") && currentPage < totalPages) {
                 currentPage++;
             } else if (userInput.equals("p") && currentPage > 1) {
                 currentPage--;
+            } else if (userInput.equals("b")) {
+                // Emprunter un livre
+                System.out.print("Enter ISBN of the book to borrow: ");
+                String isbn = scanner.nextLine().trim();
+
+                // Rechercher le livre par ISBN et emprunter
+                Book bookToBorrow = books.stream()
+                        .filter(book -> book.getISBN().equals(isbn))
+                        .findFirst()
+                        .orElse(null);
+
+                if (bookToBorrow == null) {
+                    System.out.println("Error: Book with ISBN " + isbn + " not found.");
+                } else if (bookToBorrow.getNumberOfCopies() > 0) {
+                    bookToBorrow.setNumberOfCopies(bookToBorrow.getNumberOfCopies() - 1);
+                    if (bookToBorrow.getNumberOfCopies() == 0) {
+                        bookToBorrow.setAvailable(false); // Marquer comme indisponible si plus de copies
+                    }
+                    System.out.println("You have successfully borrowed the book: " + bookToBorrow.getTitle());
+                } else {
+                    System.out.println("Error: No copies available for this book.");
+                }
             } else if (!userInput.equals("q")) {
                 System.out.println("Invalid choice. Please try again.");
             }
