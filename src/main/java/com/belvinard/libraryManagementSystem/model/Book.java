@@ -2,6 +2,7 @@ package com.belvinard.libraryManagementSystem.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.Set;
@@ -17,9 +18,11 @@ public class Book {
     private String title;
     private String author;
     private String genre;
+    // Getter pour l'ISBN
+    @Getter
     private String ISBN;
     private int publicationYear;
-    private boolean isAvailable;  // Détermine si le livre est disponible ou non
+    private boolean isAvailable = true;  // Détermine si le livre est disponible ou non
 
     public boolean isAvailable() {
         return isAvailable;
@@ -29,19 +32,31 @@ public class Book {
         isAvailable = available;
     }
 
+    // Marquer le livre comme emprunté
     public void markAsBorrowed() {
-        this.isAvailable = false; // Marque le livre comme emprunté
+        if (!this.isAvailable) {
+            System.out.println("Error: This book is already borrowed.");
+            return;
+        }
+        this.isAvailable = false;  // Marque le livre comme emprunté
+        System.out.println("The book has been marked as borrowed.");
     }
 
+    // Marquer le livre comme retourné
     public void markAsReturned() {
-        this.isAvailable = true; // Marque le livre comme retourné
+        if (this.isAvailable) {
+            System.out.println("Error: This book is already available.");
+            return;
+        }
+        this.isAvailable = true;  // Marque le livre comme retourné
+        System.out.println("The book has been marked as returned.");
     }
+
 
     // Allowed genres for validation (modifiable via configuration in the future)
     private static final Set<String> ALLOWED_GENRES = Set.of(
             "front-end development", "web design", "software development",
-            "full-stack development", "" +
-                    ""
+            "full-stack development", ""
     );
 
     public Book(String fieldValue) {
@@ -145,5 +160,6 @@ public class Book {
         }
         return true;
     }
+
 
 }

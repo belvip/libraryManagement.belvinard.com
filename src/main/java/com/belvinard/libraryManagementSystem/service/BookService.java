@@ -2,6 +2,7 @@ package com.belvinard.libraryManagementSystem.service;
 
 import com.belvinard.libraryManagementSystem.data.LibraryData;
 import com.belvinard.libraryManagementSystem.exception.BookAlreadyExistsException;
+import com.belvinard.libraryManagementSystem.exception.BookNotFoundException;
 import com.belvinard.libraryManagementSystem.model.Book;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,9 +18,11 @@ public class BookService {
     private List<Book> books;
     private static final Logger logger = LoggerFactory.getLogger(BookService.class);
 
+
     @Autowired
     public BookService(LibraryData libraryData) {
         this.libraryData = libraryData;
+        this.books = new ArrayList<>(); // Initialisation de la liste
     }
     /*public BookService(LibraryData libraryData, List<Book> books) {
         this.libraryData = libraryData;
@@ -32,13 +35,21 @@ public class BookService {
 
     public void addBook(Book book) {
         try {
+            // Vérifier si le champ isAvailable est correctement initialisé
+            if (!book.isAvailable()) {
+                logger.warn("Book with ISBN {} is marked as unavailable by default. Setting it to available.", book.getISBN());
+                book.setAvailable(true); // Marque le livre comme disponible
+            }
+
             libraryData.addBook(book); // Appel à la méthode dans LibraryData
+            logger.info("Book added successfully: ISBN={} Title={} Author={} Available={}",
+                    book.getISBN(), book.getTitle(), book.getAuthor(), book.isAvailable());
         } catch (BookAlreadyExistsException e) {
             logger.error("Failed to add book: {}", e.getMessage());
-            // Propager l'exception après l'avoir loggée
-            throw e;
+            throw e; // Propager l'exception après l'avoir loggée
         }
     }
+
 
     /* ===================================== Method to display all books  ===================================== */
     // Méthode pour récupérer tous les livres
@@ -50,9 +61,34 @@ public class BookService {
     /* ===================================== Method to update book  ===================================== */
     public void updateBook(Book updatedBook) {
         try {
-            libraryData.updateBook(updatedBook);
-        } catch (IllegalArgumentException e){
-            logger.error("Failed to update book : {}", e.getMessage());
+            // Vérifier que le livre et l'ISBN ne sont pas nuls
+            if (updatedBook == null || updatedBook.getISBN() == null) {
+                throw new IllegalArgumentException("Book or ISBN cannot be null");
+            }
+
+            // Trouver le livre avec l'ISBN correspondant
+            boolean bookUpdated = false;
+            for (int i = 0; i < books.size(); i++) {
+                Book existingBook = books.get(i);
+                if (existingBook.getISBN().equals(updatedBook.getISBN())) {
+                    // Si un livre avec le même ISBN est trouvé, le mettre à jour
+                    books.set(i, updatedBook);
+                    bookUpdated = true;
+                    break; // Sortir de la boucle une fois le livre mis à jour
+                }
+            }
+
+            // Si aucun livre n'a été trouvé, on peut soit lancer une exception, soit l'ajouter
+            if (!bookUpdated) {
+                throw new IllegalArgumentException("Book with ISBN " + updatedBook.getISBN() + " not found");
+            }
+
+            // Optionnel: Message confirmant que le livre a été mis à jour
+            System.out.println("Book with ISBN " + updatedBook.getISBN() + " has been updated.");
+
+        } catch (IllegalArgumentException e) {
+            // En cas d'erreur, loggez et relancez l'exception
+            logger.error("Failed to update book: {}", e.getMessage());
             throw e;
         }
     }
@@ -65,6 +101,7 @@ public class BookService {
             throw e; // Vous pouvez relancer l'exception pour la gérer plus haut
         }
     }
+
 
     /* ===================================== Method to remove book  ===================================== */
 

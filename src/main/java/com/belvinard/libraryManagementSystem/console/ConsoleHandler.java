@@ -1,12 +1,12 @@
 package com.belvinard.libraryManagementSystem.console;
 
+import com.belvinard.libraryManagementSystem.exception.BookNotFoundException;
 import com.belvinard.libraryManagementSystem.exception.UserNotFoundException;
 import com.belvinard.libraryManagementSystem.model.Book;
 import com.belvinard.libraryManagementSystem.model.Loan;
 import com.belvinard.libraryManagementSystem.model.User;
 import com.belvinard.libraryManagementSystem.service.BookService;
 import com.belvinard.libraryManagementSystem.service.UserService;
-import com.belvinard.libraryManagementSystem.util.BookSortService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,12 +22,16 @@ public class ConsoleHandler {
     private UserInputHandler userInputHandler;
     @Autowired
     private UserService userService;
-    private final BookSortService bookSortService;
+
     private Scanner scanner = new Scanner(System.in);
 
-    public ConsoleHandler(BookService bookService, Scanner scanner) {
+    @Autowired
+    public ConsoleHandler(UserService userService, BookService bookService,
+                          UserInputHandler userInputHandler,Scanner scanner) {
+        this.userService = userService;
+        this.userInputHandler = userInputHandler;
         this.bookService = bookService;
-        this.bookSortService = new BookSortService(books);
+
     }
 
     /*
@@ -186,7 +190,7 @@ public class ConsoleHandler {
 
     /* ================================================ Method to display all books =================================== */
 
-    public void displayAllBooks(){
+    /*public void displayAllBooks(){
         List<Book> books = bookService.getAllBooks();
 
         if(books.isEmpty()){
@@ -201,7 +205,66 @@ public class ConsoleHandler {
 
         // Afficher le nombre de livres dans la liste
         System.out.println("\nNumber of books in the list: " + books.size());
+    }*/
+
+    private static final int PAGE_SIZE = 5; // Nombre de livres par page
+
+    public void displayAllBooks() {
+        List<Book> books = bookService.getAllBooks();
+
+        if (books.isEmpty()) {
+            System.out.println("No books have been added yet.");
+            return;
+        }
+
+        int totalBooks = books.size();
+        int totalPages = (int) Math.ceil((double) totalBooks / PAGE_SIZE);
+        int currentPage = 1;
+
+        Scanner scanner = new Scanner(System.in);
+        String userInput;
+
+        do {
+            // Calcul des indices pour afficher la page actuelle
+            int startIndex = (currentPage - 1) * PAGE_SIZE;
+            int endIndex = Math.min(startIndex + PAGE_SIZE, totalBooks);
+
+            // Afficher les livres de la page actuelle
+            System.out.println("\n================= List of Books =================");
+            System.out.printf("%-15s %-30s %-20s %-15s %-10s %n",
+                    "ISBN", "Title", "Author", "Genre", "Available");
+            System.out.println("-------------------------------------------------------------------------");
+            for (int i = startIndex; i < endIndex; i++) {
+                Book book = books.get(i);
+                System.out.printf("%-15s %-30s %-20s %-15s %-10s %n",
+                        book.getISBN(), book.getTitle(), book.getAuthor(), book.getGenre(),
+                        book.isAvailable() ? "Yes" : "No");
+            }
+
+            // Afficher les instructions de navigation
+            System.out.printf("\nPage %d of %d%n", currentPage, totalPages);
+            System.out.println("Press 'n' for Next, 'p' for Previous, 'q' to Quit.");
+
+            // Lire l'entrée utilisateur
+            System.out.print("Your choice: ");
+            userInput = scanner.nextLine().trim().toLowerCase();
+
+            // Naviguer entre les pages
+            if (userInput.equals("n") && currentPage < totalPages) {
+                currentPage++;
+            } else if (userInput.equals("p") && currentPage > 1) {
+                currentPage--;
+            } else if (!userInput.equals("q")) {
+                System.out.println("Invalid choice. Please try again.");
+            }
+
+        } while (!userInput.equals("q"));
+
+        System.out.println("Exiting book display.");
     }
+
+
+
 
     // Afficher un livre par son ISBN
     private void displayBookByISBN() {
@@ -425,63 +488,68 @@ public class ConsoleHandler {
         System.out.print("Enter your username: ");
         String username = scanner.nextLine();
 
-        // Vérifier si l'utilisateur existe
-        User user = userService.getUserByUsername(username);
+        User user = null;
+        int attempts = 3;  // Limite le nombre de tentatives pour trouver l'utilisateur
 
-        if (user == null) {
-            System.out.println("User not found. Please create an account first.");
-            return;
+        // Boucle pour tenter de récupérer l'utilisateur avec plusieurs essais
+        while (attempts > 0) {
+            try {
+                user = userService.getUserByUsername(username); // Tenter de récupérer l'utilisateur par son nom d'utilisateur
+                break;  // Si l'utilisateur est trouvé, sortir de la boucle
+            } catch (UserNotFoundException e) {
+                System.out.println("User with username " + username + " not found.");
+                attempts--;
+                if (attempts > 0) {
+                    System.out.print("Enter your username again: ");
+                    username = scanner.nextLine();
+                }
+            }
         }
 
-        // Si l'utilisateur existe, demander ses autres informations
-        System.out.print("Enter your full name: ");
-        String fullName = scanner.nextLine();
-        user.setFullName(fullName);
+        // Si l'utilisateur n'a pas été trouvé après plusieurs tentatives, proposer de créer un nouvel utilisateur
+        if (user == null) {
+            System.out.println("User not found after multiple attempts. You can now create a new user.");
+            user = userInputHandler.createUser(username); // Enregistrer un nouvel utilisateur
+        }
 
-        System.out.print("Enter your email: ");
-        String email = scanner.nextLine();
-        user.setEmail(email);
-
-        System.out.print("Enter your phone number: ");
-        String phoneNumber = scanner.nextLine();
-        user.setPhoneNumber(phoneNumber);
-
-        System.out.print("Enter your address: ");
-        String address = scanner.nextLine();
-        user.setAddress(address);
-
-        // Vérifier si le livre est disponible pour l'emprunt
+        // Demander l'ISBN du livre à emprunter
         System.out.print("Enter the ISBN of the book you want to borrow: ");
         String isbn = scanner.nextLine();
 
+        // Récupérer le livre en fonction de l'ISBN
+        Book book = bookService.getBookByISBN(isbn);
+        if (book == null) {
+            System.out.println("Error: Book with ISBN " + isbn + " not found.");
+            return;  // Si le livre n'est pas trouvé, sortir de la méthode
+        }
+
+        // Vérifier l'état de disponibilité du livre
+        System.out.println("Book availability: " + book.isAvailable());  // Message de débogage pour afficher l'état de disponibilité
+
+        // Si le livre est déjà emprunté, afficher un message et arrêter l'emprunt
+        if (!book.isAvailable()) {
+            System.out.println("Sorry, the book is currently unavailable for borrowing.");
+            return;  // Le livre est déjà emprunté, quitter la méthode
+        }
+
+        // Si le livre est disponible, procéder à l'emprunt
         try {
-            Book book = bookService.getBookByISBN(isbn);
-            System.out.println("You have chosen to borrow the following book:");
-            System.out.println(book);
+            // Créer un emprunt et l'ajouter à l'historique de l'utilisateur
+            Loan loan = new Loan(book, user, new Date());
+            user.addLoan(loan);
+            System.out.println("Loan added to your history.");
 
-            // Vérifier si le livre est disponible pour l'emprunt
-            if (book.isAvailable()) {
-                // Créer un objet Loan pour l'emprunt
-                Loan loan = new Loan(book, user, new Date());
+            // Marquer le livre comme emprunté
+            book.markAsBorrowed();
+            System.out.println("The book has been marked as borrowed.");
 
-                // Ajouter l'emprunt à l'historique de l'utilisateur
-                user.addLoan(loan);
-                System.out.println("Loan added to your history.");
+            // Mettre à jour l'utilisateur et le livre
+            userService.borrowBook(user, book);
+            bookService.updateBook(book);
 
-                // Mettre à jour l'état du livre (marquer le livre comme emprunté)
-                book.markAsBorrowed();
-                System.out.println("The book has been marked as borrowed.");
-
-                // Mettre à jour l'utilisateur et le livre via les services
-                userService.borrowBook(user, book);
-                bookService.updateBook(book);
-
-                System.out.println("Book borrowed successfully.");
-            } else {
-                System.out.println("Sorry, the book is currently unavailable for borrowing.");
-            }
-        } catch (IllegalArgumentException e) {
-            System.out.println("Error: " + e.getMessage());
+            System.out.println("Book borrowed successfully.");
+        } catch (Exception e) {
+            System.out.println("Error occurred while borrowing the book: " + e.getMessage());
         }
     }
 

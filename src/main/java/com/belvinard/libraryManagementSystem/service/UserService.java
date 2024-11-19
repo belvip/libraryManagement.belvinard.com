@@ -65,13 +65,14 @@ public class UserService {
 
 
     // Récupérer un utilisateur par son nom d'utilisateur
-    public User getUserByUsername(String username) {
-        User user = users.get(username);
+    public User getUserByUsername(String username) throws UserNotFoundException {
+        User user = users.get(username); // Supposons que `users` soit une map contenant tous les utilisateurs
         if (user == null) {
             throw new UserNotFoundException("User with username " + username + " not found.");
         }
         return user;
     }
+
 
     // Mettre à jour les informations d'un utilisateur
     public void updateUser(User user) {
