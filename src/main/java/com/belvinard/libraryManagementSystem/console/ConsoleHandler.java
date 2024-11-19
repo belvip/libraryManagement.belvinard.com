@@ -1,4 +1,5 @@
 
+
 package com.belvinard.libraryManagementSystem.console;
 
 import com.belvinard.libraryManagementSystem.data.LibraryData;
@@ -458,6 +459,11 @@ public class ConsoleHandler {
         // Marquer le livre comme retourné
         book.markAsReturned();
         System.out.println("The book has been marked as returned.");
+
+
+        // Mettre à jour le statut du prêt
+        loan.updateReturnStatus();  // Mise à jour du statut de retour du prêt
+        System.out.println("The loan status has been updated to 'Returned'.");
 
         // Supprimer le prêt de l'historique de l'utilisateur
         user.removeLoan(loan);

@@ -100,4 +100,9 @@ public class Loan {
             return "On time"; // Le retour est à temps
         }
     }
+
+    public void updateReturnStatus() {
+        this.returnStatus = "Returned";  // Mise à jour du statut basé sur la date de retour
+    }
+
 }

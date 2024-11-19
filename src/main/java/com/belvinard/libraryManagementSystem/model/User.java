@@ -30,7 +30,7 @@ public class User {
     public User(String username, String password) {
         this.username = username;
         this.password = password;
-        this.borrowLimit = 55;  // Limite d'emprunt par défaut
+        this.borrowLimit = 5;  // Limite d'emprunt par défaut
         this.borrowedBooksHistory = new ArrayList<>();
     }
 
