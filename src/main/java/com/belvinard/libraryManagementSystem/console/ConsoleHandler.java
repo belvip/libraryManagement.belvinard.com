@@ -1,5 +1,6 @@
 package com.belvinard.libraryManagementSystem.console;
 
+import com.belvinard.libraryManagementSystem.data.LibraryData;
 import com.belvinard.libraryManagementSystem.exception.BookNotFoundException;
 import com.belvinard.libraryManagementSystem.exception.UserNotFoundException;
 import com.belvinard.libraryManagementSystem.model.Book;
@@ -22,6 +23,8 @@ public class ConsoleHandler {
     private UserInputHandler userInputHandler;
     @Autowired
     private UserService userService;
+    @Autowired
+    private LibraryData libraryData;
 
     private Scanner scanner = new Scanner(System.in);
 
@@ -484,18 +487,18 @@ public class ConsoleHandler {
 
     //*********************** BORROW BOOK
     // Méthode pour emprunter un livre
+
     private void borrowBook() {
         System.out.print("Enter your username: ");
         String username = scanner.nextLine();
 
         User user = null;
-        int attempts = 3;  // Limite le nombre de tentatives pour trouver l'utilisateur
+        int attempts = 3; // Limite le nombre de tentatives
 
-        // Boucle pour tenter de récupérer l'utilisateur avec plusieurs essais
         while (attempts > 0) {
             try {
-                user = userService.getUserByUsername(username); // Tenter de récupérer l'utilisateur par son nom d'utilisateur
-                break;  // Si l'utilisateur est trouvé, sortir de la boucle
+                user = userService.getUserByUsername(username);
+                break; // Si trouvé, sortir de la boucle
             } catch (UserNotFoundException e) {
                 System.out.println("User with username " + username + " not found.");
                 attempts--;
@@ -506,52 +509,100 @@ public class ConsoleHandler {
             }
         }
 
-        // Si l'utilisateur n'a pas été trouvé après plusieurs tentatives, proposer de créer un nouvel utilisateur
         if (user == null) {
             System.out.println("User not found after multiple attempts. You can now create a new user.");
             user = userInputHandler.createUser(username); // Enregistrer un nouvel utilisateur
         }
 
-        // Demander l'ISBN du livre à emprunter
         System.out.print("Enter the ISBN of the book you want to borrow: ");
         String isbn = scanner.nextLine();
 
-        // Récupérer le livre en fonction de l'ISBN
+        // Utiliser libraryData pour obtenir le livre
+        Book book = libraryData.getBookByISBN(isbn); // Modification ici
+        if (book == null) {
+            System.out.println("Error: Book with ISBN " + isbn + " not found.");
+            return;
+        }
+
+        if (!book.isAvailable()) {
+            System.out.println("Sorry, the book is currently unavailable for borrowing.");
+            return;
+        }
+
+        Loan loan = new Loan(book, user, new Date());
+        user.addLoan(loan);
+        System.out.println("Loan added to your history.");
+
+        // Marquer le livre comme emprunté
+        book.markAsBorrowed();
+        System.out.println("The book has been marked as borrowed.");
+
+        try {
+            // Mettre à jour dans la base de données via libraryData
+            libraryData.updateBook(book); // Modification ici
+            userService.borrowBook(user, book); // Mettre à jour l'historique utilisateur
+            System.out.println("Book borrowed successfully.");
+        } catch (Exception e) {
+            System.err.println("Error occurred while borrowing the book: " + e.getMessage());
+        }
+    }
+
+    /*private void borrowBook() {
+        System.out.print("Enter your username: ");
+        String username = scanner.nextLine();
+
+        User user = null;
+        int attempts = 3; // Limite le nombre de tentatives
+
+        while (attempts > 0) {
+            try {
+                user = userService.getUserByUsername(username);
+                break; // Si trouvé, sortir de la boucle
+            } catch (UserNotFoundException e) {
+                System.out.println("User with username " + username + " not found.");
+                attempts--;
+                if (attempts > 0) {
+                    System.out.print("Enter your username again: ");
+                    username = scanner.nextLine();
+                }
+            }
+        }
+
+        if (user == null) {
+            System.out.println("User not found after multiple attempts. You can now create a new user.");
+            user = userInputHandler.createUser(username); // Enregistrer un nouvel utilisateur
+        }
+
+        System.out.print("Enter the ISBN of the book you want to borrow: ");
+        String isbn = scanner.nextLine();
+
         Book book = bookService.getBookByISBN(isbn);
         if (book == null) {
             System.out.println("Error: Book with ISBN " + isbn + " not found.");
-            return;  // Si le livre n'est pas trouvé, sortir de la méthode
+            return;
         }
 
-        // Vérifier l'état de disponibilité du livre
-        System.out.println("Book availability: " + book.isAvailable());  // Message de débogage pour afficher l'état de disponibilité
-
-        // Si le livre est déjà emprunté, afficher un message et arrêter l'emprunt
         if (!book.isAvailable()) {
             System.out.println("Sorry, the book is currently unavailable for borrowing.");
-            return;  // Le livre est déjà emprunté, quitter la méthode
+            return;
         }
 
-        // Si le livre est disponible, procéder à l'emprunt
+        Loan loan = new Loan(book, user, new Date());
+        user.addLoan(loan);
+        System.out.println("Loan added to your history.");
+
+        // Marquer le livre comme emprunté
+        book.markAsBorrowed();
+        System.out.println("The book has been marked as borrowed.");
+
         try {
-            // Créer un emprunt et l'ajouter à l'historique de l'utilisateur
-            Loan loan = new Loan(book, user, new Date());
-            user.addLoan(loan);
-            System.out.println("Loan added to your history.");
-
-            // Marquer le livre comme emprunté
-            book.markAsBorrowed();
-            System.out.println("The book has been marked as borrowed.");
-
-            // Mettre à jour l'utilisateur et le livre
-            userService.borrowBook(user, book);
-            bookService.updateBook(book);
-
+            bookService.updateBook(book); // Mettre à jour dans la base de données
+            userService.borrowBook(user, book); // Mettre à jour l'historique utilisateur
             System.out.println("Book borrowed successfully.");
         } catch (Exception e) {
-            System.out.println("Error occurred while borrowing the book: " + e.getMessage());
+            System.err.println("Error occurred while borrowing the book: " + e.getMessage());
         }
-    }
+    }   */
 
 
     // ********************** Gérer les utilisateurs
