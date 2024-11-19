@@ -495,6 +495,7 @@ public class ConsoleHandler {
         User user = null;
         int attempts = 3; // Limite le nombre de tentatives
 
+        // Vérification de l'utilisateur
         while (attempts > 0) {
             try {
                 user = userService.getUserByUsername(username);
@@ -509,26 +510,36 @@ public class ConsoleHandler {
             }
         }
 
+        // Création d'un nouvel utilisateur si non trouvé
         if (user == null) {
             System.out.println("User not found after multiple attempts. You can now create a new user.");
             user = userInputHandler.createUser(username); // Enregistrer un nouvel utilisateur
         }
 
+        // Vérification de la limite de prêts
+        if (user.getBorrowedBooksHistory().size() >= user.getBorrowLimit()) {
+            System.out.println("Error occurred while borrowing the book: Borrow limit reached.");
+            return;
+        }
+
+        // Entrée de l'ISBN du livre
         System.out.print("Enter the ISBN of the book you want to borrow: ");
         String isbn = scanner.nextLine();
 
-        // Utiliser libraryData pour obtenir le livre
+        // Récupérer le livre via libraryData
         Book book = libraryData.getBookByISBN(isbn); // Modification ici
         if (book == null) {
             System.out.println("Error: Book with ISBN " + isbn + " not found.");
             return;
         }
 
+        // Vérification de la disponibilité du livre
         if (!book.isAvailable()) {
             System.out.println("Sorry, the book is currently unavailable for borrowing.");
             return;
         }
 
+        // Créer un prêt et l'ajouter à l'historique de l'utilisateur
         Loan loan = new Loan(book, user, new Date());
         user.addLoan(loan);
         System.out.println("Loan added to your history.");
@@ -537,10 +548,10 @@ public class ConsoleHandler {
         book.markAsBorrowed();
         System.out.println("The book has been marked as borrowed.");
 
+        // Mettre à jour le livre et l'historique de l'utilisateur
         try {
-            // Mettre à jour dans la base de données via libraryData
-            libraryData.updateBook(book); // Modification ici
-            userService.borrowBook(user, book); // Mettre à jour l'historique utilisateur
+            libraryData.updateBook(book); // Mise à jour de l'état du livre dans la collection
+            userService.borrowBook(user, book); // Mise à jour de l'historique utilisateur
             System.out.println("Book borrowed successfully.");
         } catch (Exception e) {
             System.err.println("Error occurred while borrowing the book: " + e.getMessage());
