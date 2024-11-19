@@ -23,6 +23,7 @@ public class Book {
     private String ISBN;
     private int publicationYear;
     private boolean isAvailable = true;  // Détermine si le livre est disponible ou non
+    private int numberOfCopies; // Le nombre de copies disponibles
 
     public boolean isAvailable() {
         return isAvailable;

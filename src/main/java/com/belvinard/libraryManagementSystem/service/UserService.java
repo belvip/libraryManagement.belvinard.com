@@ -104,24 +104,6 @@ public class UserService {
     }
 
 
-    // Exemple d'une méthode borrowBook dans UserService
-    // Méthode pour emprunter un livre
-    /*public void borrowBook(User user, Book book) {
-        // Vérifier si l'utilisateur a atteint sa limite d'emprunts
-        if (user.hasReachedBorrowLimit()) {
-            throw new IllegalArgumentException("Borrow limit reached.");
-        }
-
-        // Créer un objet Loan avec la date actuelle
-        Loan loan = new Loan(book, user, new Date());  // Passer la date actuelle
-
-        // Ajouter l'emprunt à l'historique de l'utilisateur
-        user.addLoan(loan);
-
-        // Mettre à jour l'état du livre (marquer comme emprunté)
-        book.setAvailable(false);  // Supposer que la méthode setAvailable existe dans Book
-        System.out.println("Book borrowed successfully.");
-    }*/
 
     public void borrowBook(User user, Book book) {
         // Vérifier si l'utilisateur a atteint sa limite d'emprunts
