@@ -539,8 +539,14 @@ public class ConsoleHandler {
             return;
         }
 
+        // Calcul de la date de retour (par exemple 14 jours après l'emprunt)
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.DAY_OF_YEAR, 14); // 14 jours de période d'emprunt
+        Date returnDate = calendar.getTime();
+
         // Créer un prêt et l'ajouter à l'historique de l'utilisateur
-        Loan loan = new Loan(book, user, new Date());
+        Loan loan = new Loan(book, user, new Date(), returnDate);
         user.addLoan(loan);
         System.out.println("Loan added to your history.");
 

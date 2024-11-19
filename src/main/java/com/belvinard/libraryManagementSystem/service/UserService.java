@@ -8,6 +8,7 @@ import com.belvinard.libraryManagementSystem.exception.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -105,7 +106,7 @@ public class UserService {
 
     // Exemple d'une méthode borrowBook dans UserService
     // Méthode pour emprunter un livre
-    public void borrowBook(User user, Book book) {
+    /*public void borrowBook(User user, Book book) {
         // Vérifier si l'utilisateur a atteint sa limite d'emprunts
         if (user.hasReachedBorrowLimit()) {
             throw new IllegalArgumentException("Borrow limit reached.");
@@ -120,5 +121,30 @@ public class UserService {
         // Mettre à jour l'état du livre (marquer comme emprunté)
         book.setAvailable(false);  // Supposer que la méthode setAvailable existe dans Book
         System.out.println("Book borrowed successfully.");
+    }*/
+
+    public void borrowBook(User user, Book book) {
+        // Vérifier si l'utilisateur a atteint sa limite d'emprunts
+        if (user.hasReachedBorrowLimit()) {
+            throw new IllegalArgumentException("Borrow limit reached.");
+        }
+
+        // Définir la date de retour (par exemple, 14 jours à partir de la date actuelle)
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.DAY_OF_MONTH, 14); // Retour prévu dans 14 jours
+        Date returnDate = calendar.getTime(); // Calculer la date de retour
+
+        // Créer un objet Loan avec la date actuelle (loanDate) et la date de retour (returnDate)
+        Loan loan = new Loan(book, user, new Date(), returnDate);  // Appeler le constructeur avec 4 paramètres
+
+        // Ajouter l'emprunt à l'historique de l'utilisateur
+        user.addLoan(loan);
+
+        // Mettre à jour l'état du livre (marquer comme emprunté)
+        book.setAvailable(false);  // Supposer que la méthode setAvailable existe dans Book
+        System.out.println("Book borrowed successfully.");
     }
+
+
 }
