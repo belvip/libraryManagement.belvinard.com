@@ -35,15 +35,22 @@ public class BookService {
 
     public void addBook(Book book) {
         try {
-            // Vérifier si le champ isAvailable est correctement initialisé
-            if (!book.isAvailable()) {
-                logger.warn("Book with ISBN {} is marked as unavailable by default. Setting it to available.", book.getISBN());
-                book.setAvailable(true); // Marque le livre comme disponible
+            // Log pour afficher la valeur du nombre de copies
+            logger.info("Trying to add book with ISBN {}. Number of copies: {}", book.getISBN(), book.getNumberOfCopies());
+
+            // Vérifiez que le nombre de copies est positif avant d'ajouter
+            if (book.getNumberOfCopies() <= 0) {
+                logger.error("Cannot add book with ISBN {}: No copies available.", book.getISBN());
+                throw new IllegalArgumentException("Error: No copies available.");
             }
 
-            libraryData.addBook(book); // Appel à la méthode dans LibraryData
+            // Appel à la méthode d'ajout de livre dans LibraryData
+            libraryData.addBook(book);
+
+            // Log de l'ajout du livre
             logger.info("Book added successfully: ISBN={} Title={} Author={} Available={}",
                     book.getISBN(), book.getTitle(), book.getAuthor(), book.isAvailable());
+
         } catch (BookAlreadyExistsException e) {
             logger.error("Failed to add book: {}", e.getMessage());
             throw e; // Propager l'exception après l'avoir loggée

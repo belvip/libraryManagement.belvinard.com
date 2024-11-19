@@ -138,12 +138,26 @@ public class ConsoleHandler {
         System.out.print("Enter book genre: ");
         String genre = scanner.nextLine();
 
+        int numberOfCopies = 0;  // Initialiser avec une valeur par défaut
+        boolean validCopies = false;
+        while (!validCopies) {
+            System.out.print("Enter book copies: ");
+            try {
+                numberOfCopies = Integer.parseInt(scanner.nextLine());  // Convertir la saisie en entier
+                if (numberOfCopies <= 0) {
+                    throw new NumberFormatException("Number of copies must be greater than zero.");
+                }
+                validCopies = true;  // Sortir de la boucle si la saisie est valide
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid positive number for the copies.");
+            }
+        }
+
         String isbn = "";
         boolean validIsbn = false;
         while (!validIsbn) {
             System.out.print("Enter book ISBN: ");
             isbn = scanner.nextLine();
-            // Vérifier que l'ISBN n'est pas vide
             if (isbn.isEmpty()) {
                 System.out.println("ISBN cannot be empty. Please enter a valid ISBN.");
             } else {
@@ -158,7 +172,7 @@ public class ConsoleHandler {
             try {
                 year = scanner.nextInt();  // Attente d'un entier pour l'année
                 scanner.nextLine();  // Consommer la nouvelle ligne restante
-                validYear = true;  // L'année est valide, on sort de la boucle
+                validYear = true;
             } catch (InputMismatchException e) {
                 System.out.println("Invalid input. Please enter a valid number for the year.");
                 scanner.nextLine();  // Consommer l'entrée invalide pour éviter la boucle infinie
@@ -169,6 +183,7 @@ public class ConsoleHandler {
         System.out.println("Book Title: " + title);
         System.out.println("Book Author: " + author);
         System.out.println("Book Genre: " + genre);
+        System.out.println("Book Copy: " + numberOfCopies);
         System.out.println("Book ISBN: " + isbn);
         System.out.println("Book Year: " + year);
 
@@ -177,38 +192,23 @@ public class ConsoleHandler {
             book.setTitle(title);
             book.setAuthor(author);
             book.setGenre(genre);
+            book.setNumberOfCopies(numberOfCopies);  // Utiliser l'entier validé ici
             book.setISBN(isbn);
             book.setPublicationYear(year);
             bookService.addBook(book);  // Ajouter le livre via le service
             System.out.println("Book added successfully.");
         } catch (com.belvinard.libraryManagementSystem.exception.BookAlreadyExistsException e) {
-            // Si l'ISBN est déjà utilisé
             System.out.println("Error: A book with ISBN " + isbn + " already exists. Please use a unique ISBN.");
         } catch (IllegalArgumentException e) {
-            // Autre exception
             System.out.println("Error: " + e.getMessage());
         }
     }
 
-
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
     /* ================================================ Method to display all books =================================== */
-
-    /*public void displayAllBooks(){
-        List<Book> books = bookService.getAllBooks();
-
-        if(books.isEmpty()){
-            System.out.println("No books have been added yet.");
-        }else {
-            System.out.println("\n================= List of Books =================");
-            for (Book book : books){
-                System.out.println(book);
-                System.out.println("-----------------------------------------------------");
-            }
-        }
-
-        // Afficher le nombre de livres dans la liste
-        System.out.println("\nNumber of books in the list: " + books.size());
-    }*/
 
     private static final int PAGE_SIZE = 5; // Nombre de livres par page
 
@@ -265,8 +265,6 @@ public class ConsoleHandler {
 
         System.out.println("Exiting book display.");
     }
-
-
 
 
     // Afficher un livre par son ISBN
@@ -495,7 +493,6 @@ public class ConsoleHandler {
         User user = null;
         int attempts = 3; // Limite le nombre de tentatives
 
-        // Vérification de l'utilisateur
         while (attempts > 0) {
             try {
                 user = userService.getUserByUsername(username);
@@ -510,43 +507,27 @@ public class ConsoleHandler {
             }
         }
 
-        // Création d'un nouvel utilisateur si non trouvé
         if (user == null) {
             System.out.println("User not found after multiple attempts. You can now create a new user.");
             user = userInputHandler.createUser(username); // Enregistrer un nouvel utilisateur
         }
 
-        // Vérification de la limite de prêts
-        if (user.getBorrowedBooksHistory().size() >= user.getBorrowLimit()) {
-            System.out.println("Error occurred while borrowing the book: Borrow limit reached.");
-            return;
-        }
-
-        // Entrée de l'ISBN du livre
         System.out.print("Enter the ISBN of the book you want to borrow: ");
         String isbn = scanner.nextLine();
 
-        // Récupérer le livre via libraryData
-        Book book = libraryData.getBookByISBN(isbn); // Modification ici
+        // Utiliser libraryData pour obtenir le livre
+        Book book = libraryData.getBookByISBN(isbn);
         if (book == null) {
             System.out.println("Error: Book with ISBN " + isbn + " not found.");
             return;
         }
 
-        // Vérification de la disponibilité du livre
         if (!book.isAvailable()) {
             System.out.println("Sorry, the book is currently unavailable for borrowing.");
             return;
         }
 
-        // Calcul de la date de retour (par exemple 14 jours après l'emprunt)
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        calendar.add(Calendar.DAY_OF_YEAR, 14); // 14 jours de période d'emprunt
-        Date returnDate = calendar.getTime();
-
-        // Créer un prêt et l'ajouter à l'historique de l'utilisateur
-        Loan loan = new Loan(book, user, new Date(), returnDate);
+        Loan loan = new Loan(book, user, new Date(), calculateReturnDate());
         user.addLoan(loan);
         System.out.println("Loan added to your history.");
 
@@ -554,72 +535,24 @@ public class ConsoleHandler {
         book.markAsBorrowed();
         System.out.println("The book has been marked as borrowed.");
 
-        // Mettre à jour le livre et l'historique de l'utilisateur
+        // Marquer le livre comme retourné
+        book.markAsReturned();
+        System.out.println("The book has been marked as returned.");
+
         try {
-            libraryData.updateBook(book); // Mise à jour de l'état du livre dans la collection
-            userService.borrowBook(user, book); // Mise à jour de l'historique utilisateur
+            libraryData.updateBook(book); // Mettre à jour dans la base de données
+            userService.borrowBook(user, book); // Mettre à jour l'historique utilisateur
             System.out.println("Book borrowed successfully.");
         } catch (Exception e) {
             System.err.println("Error occurred while borrowing the book: " + e.getMessage());
         }
     }
 
-    /*private void borrowBook() {
-        System.out.print("Enter your username: ");
-        String username = scanner.nextLine();
-
-        User user = null;
-        int attempts = 3; // Limite le nombre de tentatives
-
-        while (attempts > 0) {
-            try {
-                user = userService.getUserByUsername(username);
-                break; // Si trouvé, sortir de la boucle
-            } catch (UserNotFoundException e) {
-                System.out.println("User with username " + username + " not found.");
-                attempts--;
-                if (attempts > 0) {
-                    System.out.print("Enter your username again: ");
-                    username = scanner.nextLine();
-                }
-            }
-        }
-
-        if (user == null) {
-            System.out.println("User not found after multiple attempts. You can now create a new user.");
-            user = userInputHandler.createUser(username); // Enregistrer un nouvel utilisateur
-        }
-
-        System.out.print("Enter the ISBN of the book you want to borrow: ");
-        String isbn = scanner.nextLine();
-
-        Book book = bookService.getBookByISBN(isbn);
-        if (book == null) {
-            System.out.println("Error: Book with ISBN " + isbn + " not found.");
-            return;
-        }
-
-        if (!book.isAvailable()) {
-            System.out.println("Sorry, the book is currently unavailable for borrowing.");
-            return;
-        }
-
-        Loan loan = new Loan(book, user, new Date());
-        user.addLoan(loan);
-        System.out.println("Loan added to your history.");
-
-        // Marquer le livre comme emprunté
-        book.markAsBorrowed();
-        System.out.println("The book has been marked as borrowed.");
-
-        try {
-            bookService.updateBook(book); // Mettre à jour dans la base de données
-            userService.borrowBook(user, book); // Mettre à jour l'historique utilisateur
-            System.out.println("Book borrowed successfully.");
-        } catch (Exception e) {
-            System.err.println("Error occurred while borrowing the book: " + e.getMessage());
-        }
-    }   */
+    private Date calculateReturnDate() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR, 14); // Exemple : Le retour doit se faire dans 14 jours
+        return calendar.getTime();
+    }
 
 
     // ********************** Gérer les utilisateurs

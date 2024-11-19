@@ -28,7 +28,7 @@ public class LibraryManagementSystemApplication {
         // consoleHandler.setUserService(userService);
         // consoleHandler.setUserInputHandler(userInputHandler);
 
-        LibraryData libraryData = new LibraryData();
+        /*LibraryData libraryData = new LibraryData();
 
         // Test : Ajouter un livre
         Book book = new Book("Title", "Author", "Genre", "12345", 2024, true);
@@ -40,7 +40,7 @@ public class LibraryManagementSystemApplication {
             System.out.println("Found book: " + foundBook);
         } else {
             System.out.println("Book not found!");
-        }
+        }*/
 
         // Démarrer l'interaction avec l'utilisateur via ConsoleHandler
         consoleHandler.start();

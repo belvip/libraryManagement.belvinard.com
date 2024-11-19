@@ -33,9 +33,21 @@ public class LibraryData {
                 throw new IllegalArgumentException("Book cannot be null.");
             }
 
+            // Vérifier si le nombre de copies est valide (doit être supérieur à 0)
+            if (book.getNumberOfCopies() <= 0) {
+                throw new IllegalArgumentException("Error: No copies available.");
+            }
+
+            // Afficher le nombre de copies juste avant d'ajouter le livre pour débogage
+            logger.info("Number of copies for book with ISBN {}: {}", book.getISBN(), book.getNumberOfCopies());
+
+            // Vérifier si le livre existe déjà dans la collection
             if (bookCollection.containsKey(book.getISBN())) {
                 throw new BookAlreadyExistsException("A book with ISBN " + book.getISBN() + " already exists.");
             }
+
+            // Si des copies sont disponibles, marquer comme disponible
+            book.setAvailable(true);  // Livre disponible
 
             // Ajouter le livre à la collection avec son ISBN comme clé
             bookCollection.put(book.getISBN(), book);
@@ -53,29 +65,6 @@ public class LibraryData {
             throw new RuntimeException("Unexpected error occurred.", e); // Propager une exception générique
         }
     }
-
-    /*public void addBook(Book book) {
-        if (book == null) {
-            throw new IllegalArgumentException("Book cannot be null.");
-        }
-
-        if (bookCollection.containsKey(book.getISBN())) {
-            throw new BookAlreadyExistsException("A book with ISBN " + book.getISBN() + " already exists.");
-        }
-
-        bookCollection.put(book.getISBN(), book); // Ajouter le livre tel quel
-        logger.info("Book with ISBN {} added successfully. Available={}", book.getISBN(), book.isAvailable());
-    }*/
-
-    /*public void addBook(Book book) {
-        try {
-            libraryData.addBook(book); // Appel direct à LibraryData
-            logger.info("Book with ISBN {} added successfully.", book.getISBN());
-        } catch (BookAlreadyExistsException e) {
-            logger.error("Failed to add book: {}", e.getMessage());
-            throw e;
-        }
-    }*/
 
 
 

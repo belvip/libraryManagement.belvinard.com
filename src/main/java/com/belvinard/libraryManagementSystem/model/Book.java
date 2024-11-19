@@ -23,41 +23,61 @@ public class Book {
     private String ISBN;
     private int publicationYear;
     private boolean isAvailable = true;  // Détermine si le livre est disponible ou non
+    @Getter
     private int numberOfCopies; // Le nombre de copies disponibles
 
+
     public boolean isAvailable() {
-        return isAvailable;
+        return numberOfCopies > 0; // Un livre est disponible si le nombre de copies est supérieur à 0
     }
 
     public void setAvailable(boolean available) {
-        isAvailable = available;
+        if (available && numberOfCopies == 0) {
+            System.out.println("Error: No copies available.");
+        } else {
+            isAvailable = available;
+        }
     }
+
+    public Book(String title, String author, String genre, String ISBN, int publicationYear, int numberOfCopies) {
+        this.title = title;
+        this.author = author;
+        this.genre = genre;
+        this.ISBN = ISBN;
+        this.publicationYear = publicationYear;
+        this.numberOfCopies = numberOfCopies;
+        this.isAvailable = numberOfCopies > 0; // Si le nombre de copies est supérieur à 0, le livre est disponible
+    }
+
+    public void setNumberOfCopies(int numberOfCopies) {
+        if (numberOfCopies < 0) {
+            throw new IllegalArgumentException("Number of copies cannot be negative");
+        }
+        this.numberOfCopies = numberOfCopies;
+    }
+
 
     // Marquer le livre comme emprunté
     public void markAsBorrowed() {
-        if (!this.isAvailable) {
-            System.out.println("Error: This book is already borrowed.");
+        if (numberOfCopies <= 0) {
+            System.out.println("Error: No copies available for borrowing.");
             return;
         }
-        this.isAvailable = false;  // Marque le livre comme emprunté
+        numberOfCopies--; // Réduire le nombre de copies disponibles
         System.out.println("The book has been marked as borrowed.");
     }
 
     // Marquer le livre comme retourné
     public void markAsReturned() {
-        if (this.isAvailable) {
-            System.out.println("Error: This book is already available.");
-            return;
-        }
-        this.isAvailable = true;  // Marque le livre comme retourné
+        numberOfCopies++; // Augmenter le nombre de copies disponibles
         System.out.println("The book has been marked as returned.");
     }
 
 
     // Allowed genres for validation (modifiable via configuration in the future)
     private static final Set<String> ALLOWED_GENRES = Set.of(
-            "front-end development", "web design", "software development",
-            "full-stack development", ""
+            "bible", "front-end development", "web design", "software development",
+            "full-stack development", "Sciences", "History", "Chemistry", "Physics"
     );
 
     public Book(String fieldValue) {
