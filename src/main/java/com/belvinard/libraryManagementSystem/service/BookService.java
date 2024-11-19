@@ -24,11 +24,6 @@ public class BookService {
         this.libraryData = libraryData;
         this.books = new ArrayList<>(); // Initialisation de la liste
     }
-    /*public BookService(LibraryData libraryData, List<Book> books) {
-        this.libraryData = libraryData;
-        this.books = books;
-    }*.
-
 
 
     /* ===================================== Method to add book  ===================================== */
@@ -283,6 +278,7 @@ public class BookService {
                 throw new IllegalArgumentException("Invalid sort field: " + sortBy);
         }
     }
+
 
 
 }

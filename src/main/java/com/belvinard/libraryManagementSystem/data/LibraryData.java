@@ -63,27 +63,23 @@ public class LibraryData {
         }
     }
 
-    public void borrowBook(String isbn) {
+    public void borrowBook(String isbn, String username) {
         if (!bookCollection.containsKey(isbn)) {
-            throw new IllegalArgumentException("Error: Book with ISBN " + isbn + " not found.");
+            throw new IllegalArgumentException("Book with ISBN " + isbn + " not found.");
         }
 
         Book book = bookCollection.get(isbn);
-
         if (book.getNumberOfCopies() <= 0) {
-            throw new IllegalArgumentException("Error: No copies available for this book.");
+            throw new IllegalArgumentException("No copies available for book: " + book.getTitle());
         }
 
-        // Diminuez le nombre de copies et mettez à jour la disponibilité
+        // Mettre à jour le nombre de copies et la disponibilité
         book.setNumberOfCopies(book.getNumberOfCopies() - 1);
-        if (book.getNumberOfCopies() == 0) {
-            book.setAvailable(false); // Si plus de copies, indisponible
-        }
+        book.setAvailable(book.getNumberOfCopies() > 0);
 
-        // Mettre à jour dans la collection (inutile si `book` est mutable)
-        bookCollection.put(isbn, book);
-        logger.info("Book with ISBN {} borrowed successfully. Remaining copies: {}", isbn, book.getNumberOfCopies());
+        logger.info("User {} borrowed book '{}'. Remaining copies: {}", username, book.getTitle(), book.getNumberOfCopies());
     }
+
 
     /**
      * Récupère tous les livres de la collection.
@@ -113,7 +109,16 @@ public class LibraryData {
      *
      *
      */
-    public void updateBook(Book updatedBook) {
+    public void updateBook(Book book) {
+        if (bookCollection.containsKey(book.getISBN())) {
+            bookCollection.put(book.getISBN(), book);
+            System.out.println("Book with ISBN " + book.getISBN() + " updated successfully.");
+        } else {
+            throw new IllegalArgumentException("Book with ISBN " + book.getISBN() + " does not exist.");
+        }
+    }
+
+    /* public void updateBook(Book updatedBook) {
         if (updatedBook == null || updatedBook.getISBN() == null || updatedBook.getISBN().isEmpty()) {
             throw new IllegalArgumentException("Updated book or ISBN cannot be null.");
         }
@@ -126,7 +131,7 @@ public class LibraryData {
         // Mettre à jour le livre dans la collection
         bookCollection.put(updatedBook.getISBN(), updatedBook);
         logger.info("Book with ISBN {} updated successfully.", updatedBook.getISBN());
-    }
+    }*/
 
 
     /**
