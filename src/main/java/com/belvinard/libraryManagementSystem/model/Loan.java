@@ -4,7 +4,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class Loan {
     // Attributs
@@ -21,6 +23,7 @@ public class Loan {
     private Date returnDate;  // Nouvel attribut pour la date de retour
     @Getter
     private String returnStatus;  // Nouvel attribut pour le statut de retour
+    private List<Loan> loans;  // Liste des prêts de l'utilisateur
 
 
 
@@ -31,6 +34,31 @@ public class Loan {
         this.loanDate = loanDate;
         this.returnDate = returnDate; // Initialisation de la date de retour
         this.returnStatus = getReturnStatus(); // Initialiser returnStatus
+    }
+
+    // Méthode pour obtenir un prêt par livre
+    public Loan getLoanByBook(Book book) {
+        for (Loan loan : loans) {
+            if (loan.getBook().equals(book)) {
+                return loan;  // Retourner le prêt correspondant au livre
+            }
+        }
+        return null;  // Si le livre n'a pas été emprunté, retourner null
+    }
+
+    // Méthode pour ajouter un prêt à l'historique de l'utilisateur
+    public void addLoan(Loan loan) {
+        if (loans == null) {
+            loans = new ArrayList<>();
+        }
+        loans.add(loan);
+    }
+
+    // Méthode pour supprimer un prêt de l'historique de l'utilisateur
+    public void removeLoan(Loan loan) {
+        if (loans != null) {
+            loans.remove(loan);
+        }
     }
 
 

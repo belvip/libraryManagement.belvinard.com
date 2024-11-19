@@ -6,10 +6,9 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
-
-import static com.belvinard.libraryManagementSystem.console.ConsoleHandler.books;
 
 @Data
 @NoArgsConstructor
@@ -49,6 +48,20 @@ public class Book {
         this.numberOfCopies = numberOfCopies;
         this.isAvailable = numberOfCopies > 0; // Si le nombre de copies est supérieur à 0, le livre est disponible
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Book book = (Book) obj;
+        return ISBN.equals(book.ISBN);  // Comparer par ISBN
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(ISBN);  // Utiliser l'ISBN pour le hashCode
+    }
+
 
     public void setNumberOfCopies(int numberOfCopies) {
         if (numberOfCopies < 0) {

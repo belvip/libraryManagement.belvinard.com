@@ -2,7 +2,6 @@
 package com.belvinard.libraryManagementSystem.console;
 
 import com.belvinard.libraryManagementSystem.data.LibraryData;
-import com.belvinard.libraryManagementSystem.exception.BookNotFoundException;
 import com.belvinard.libraryManagementSystem.exception.UserNotFoundException;
 import com.belvinard.libraryManagementSystem.model.Book;
 import com.belvinard.libraryManagementSystem.model.Loan;
@@ -87,6 +86,9 @@ public class ConsoleHandler {
                     borrowBook();  // Emprunter un livre
                     break;
                 case 13:
+                    returnBook();  // Emprunter un livre
+                    break;
+                case 14:
                     running = false;
                     System.out.println("Exiting the system...");
                     break;
@@ -123,7 +125,8 @@ public class ConsoleHandler {
                         "Press 10 for Displaying All Users \n" +
                         "Press 11 for Deleting User \n" +
                         "Press 12 for Borrowing Book \n" +
-                        "Press 13 for Exiting the portal\n"
+                        "Press 13 for Returning Book \n" +
+                        "Press 14 for Exiting the portal\n"
         );
         System.out.print("Enter your choice: ");
     }
@@ -405,6 +408,72 @@ public class ConsoleHandler {
             System.err.println("Error occurred while borrowing the book: " + e.getMessage());
         }
     }
+
+    /* ================================================ Method to RETURN books =================================== */
+
+    private void returnBook() {
+        System.out.print("Enter your username: ");
+        String username = scanner.nextLine();
+
+        User user = null;
+        int attempts = 3; // Limite le nombre de tentatives
+
+        // Vérification de l'utilisateur
+        while (attempts > 0) {
+            try {
+                user = userService.getUserByUsername(username);
+                break; // Si trouvé, sortir de la boucle
+            } catch (UserNotFoundException e) {
+                System.out.println("User with username " + username + " not found.");
+                attempts--;
+                if (attempts > 0) {
+                    System.out.print("Enter your username again: ");
+                    username = scanner.nextLine();
+                }
+            }
+        }
+
+        if (user == null) {
+            System.out.println("User not found after multiple attempts. Returning to main menu.");
+            return;
+        }
+
+        System.out.print("Enter the ISBN of the book you want to return: ");
+        String isbn = scanner.nextLine();
+
+        // Vérification de l'existence du livre
+        Book book = libraryData.getBookByISBN(isbn);
+        if (book == null) {
+            System.out.println("Error: Book with ISBN " + isbn + " not found.");
+            return;
+        }
+
+        // Vérification que l'utilisateur a bien emprunté le livre
+        Loan loan = user.getLoanByBook(book);
+        if (loan == null) {
+            System.out.println("Error: This book was not borrowed by this user.");
+            return;
+        }
+
+        // Marquer le livre comme retourné
+        book.markAsReturned();
+        System.out.println("The book has been marked as returned.");
+
+        // Supprimer le prêt de l'historique de l'utilisateur
+        user.removeLoan(loan);
+        System.out.println("The loan has been removed from your history.");
+
+        // Mettre à jour la bibliothèque et l'historique de l'utilisateur
+        try {
+            libraryData.updateBook(book); // Mettre à jour le livre dans la base de données
+            userService.updateUser(user); // Mettre à jour l'historique de l'utilisateur
+            System.out.println("Book returned successfully.");
+        } catch (Exception e) {
+            System.err.println("Error occurred while returning the book: " + e.getMessage());
+        }
+    }
+
+
 
     /* ================================================ Method to remove books =================================== */
 

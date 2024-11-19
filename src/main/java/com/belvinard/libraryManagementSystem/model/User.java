@@ -24,6 +24,7 @@ public class User {
     private String address;
     private List<Loan> borrowedBooksHistory = new ArrayList<>(); // Historique des emprunts
     private int borrowLimit; // Limite d'emprunts
+    private List<Loan> loans;  // Liste des prêts de l'utilisateur
 
     // Constructeur avec seulement username et password
     public User(String username, String password) {
@@ -33,8 +34,32 @@ public class User {
         this.borrowedBooksHistory = new ArrayList<>();
     }
 
-    // Méthode pour ajouter un emprunt à l'historique
+    // Méthode pour obtenir un prêt par livre
+    public Loan getLoanByBook(Book book) {
+        for (Loan loan : loans) {
+            if (loan.getBook().equals(book)) {
+                return loan;  // Retourner le prêt correspondant au livre
+            }
+        }
+        return null;  // Si le livre n'a pas été emprunté, retourner null
+    }
+
+    // Méthode pour supprimer un prêt de l'historique de l'utilisateur
+    public void removeLoan(Loan loan) {
+        if (loans != null) {
+            loans.remove(loan);
+        }
+    }
+
+
+    // Méthode pour ajouter un emprunt à l'historique ; Méthode pour ajouter un prêt à l'historique de l'utilisateur
     public void addLoan(Loan loan) {
+
+        if (loans == null) {
+            loans = new ArrayList<>();
+        }
+        loans.add(loan);
+
         borrowedBooksHistory.add(loan);
     }
 

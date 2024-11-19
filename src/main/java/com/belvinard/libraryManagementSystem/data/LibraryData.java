@@ -118,22 +118,6 @@ public class LibraryData {
         }
     }
 
-    /* public void updateBook(Book updatedBook) {
-        if (updatedBook == null || updatedBook.getISBN() == null || updatedBook.getISBN().isEmpty()) {
-            throw new IllegalArgumentException("Updated book or ISBN cannot be null.");
-        }
-
-        // Vérifier si le livre existe dans la collection
-        if (!bookCollection.containsKey(updatedBook.getISBN())) {
-            throw new IllegalArgumentException("No book found with ISBN " + updatedBook.getISBN());
-        }
-
-        // Mettre à jour le livre dans la collection
-        bookCollection.put(updatedBook.getISBN(), updatedBook);
-        logger.info("Book with ISBN {} updated successfully.", updatedBook.getISBN());
-    }*/
-
-
     /**
      * Supprime un livre de la collection par son ISBN.
      *
