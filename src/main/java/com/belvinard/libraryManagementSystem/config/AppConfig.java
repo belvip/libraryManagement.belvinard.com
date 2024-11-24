@@ -1,5 +1,6 @@
 package com.belvinard.libraryManagementSystem.config;
 
+import com.belvinard.libraryManagementSystem.activity.ActivityManager;
 import com.belvinard.libraryManagementSystem.console.ConsoleHandler;
 import com.belvinard.libraryManagementSystem.console.UserInputHandler;
 import com.belvinard.libraryManagementSystem.data.LibraryData;
@@ -26,8 +27,13 @@ public class AppConfig {
     }
 
     @Bean
+    public ActivityManager activityManager() {
+        return new ActivityManager();
+    }
+
+    @Bean
     public UserInputHandler userInputHandler() {
-        return new UserInputHandler(userService(), new Scanner(System.in));
+        return new UserInputHandler(userService(), activityManager(), new Scanner(System.in));
     }
 
 
@@ -43,7 +49,13 @@ public class AppConfig {
 
     @Bean
     public ConsoleHandler consoleHandler() {
-        // return new ConsoleHandler(bookService(), scanner());  // Injecte BookService et Scanner dans ConsoleHandler
-        return new ConsoleHandler(userService(), bookService(libraryData()), userInputHandler(), new Scanner(System.in));
+        return new ConsoleHandler(
+                userService(),                     // Service utilisateur
+                bookService(libraryData()),        // Service des livres
+                userInputHandler(),                // Gestionnaire des saisies utilisateur
+                activityManager(),                 // Gestionnaire des activités
+                scanner()                          // Scanner
+        );
     }
+
 }

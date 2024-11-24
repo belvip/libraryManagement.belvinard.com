@@ -2,7 +2,10 @@
 
 package com.belvinard.libraryManagementSystem.console;
 
+import com.belvinard.libraryManagementSystem.activity.Activity;
+import com.belvinard.libraryManagementSystem.activity.ActivityManager;
 import com.belvinard.libraryManagementSystem.data.LibraryData;
+import com.belvinard.libraryManagementSystem.exception.BookAlreadyExistsException;
 import com.belvinard.libraryManagementSystem.exception.UserNotFoundException;
 import com.belvinard.libraryManagementSystem.model.Book;
 import com.belvinard.libraryManagementSystem.model.Loan;
@@ -29,14 +32,22 @@ public class ConsoleHandler {
 
     private Scanner scanner = new Scanner(System.in);
 
+    private final ActivityManager activityManager;
+
+
     @Autowired
     public ConsoleHandler(UserService userService, BookService bookService,
-                          UserInputHandler userInputHandler,Scanner scanner) {
+                          UserInputHandler userInputHandler,
+                          ActivityManager activityManager,
+                          Scanner scanner) {
         this.userService = userService;
         this.userInputHandler = userInputHandler;
         this.bookService = bookService;
+        this.activityManager = activityManager;
 
     }
+
+
 
     /*
      * ============================= Console starts =============================
@@ -90,6 +101,9 @@ public class ConsoleHandler {
                     returnBook();  // Emprunter un livre
                     break;
                 case 14:
+                    displayRecentActivities();  // Afficher les activités récentes
+                    break;
+                case 15:
                     running = false;
                     System.out.println("Exiting the system...");
                     break;
@@ -127,7 +141,8 @@ public class ConsoleHandler {
                         "Press 11 for Deleting User \n" +
                         "Press 12 for Borrowing Book \n" +
                         "Press 13 for Returning Book \n" +
-                        "Press 14 for Exiting the portal\n"
+                        "Press 14 for Displaying Resents Activities \n" +
+                        "Press 15 for Exiting the portal\n"
         );
         System.out.print("Enter your choice: ");
     }
@@ -202,7 +217,7 @@ public class ConsoleHandler {
             book.setPublicationYear(year);
             bookService.addBook(book);  // Ajouter le livre via le service
             System.out.println("Book added successfully.");
-        } catch (com.belvinard.libraryManagementSystem.exception.BookAlreadyExistsException e) {
+        } catch (BookAlreadyExistsException e) {
             System.out.println("Error: A book with ISBN " + isbn + " already exists. Please use a unique ISBN.");
         } catch (IllegalArgumentException e) {
             System.out.println("Error: " + e.getMessage());
@@ -539,6 +554,17 @@ public class ConsoleHandler {
     /* ================================================ Methods to search books =================================== */
 
     private void searchBooks() {
+        System.out.print("Enter your username: ");
+        String username = scanner.nextLine();
+
+        User user;
+        try {
+            user = userService.getUserByUsername(username);
+        } catch (UserNotFoundException e) {
+            System.out.println("User not found. Please try again.");
+            return;
+        }
+
         System.out.println("Choose search type:");
         System.out.println("1. Linear Search");
         System.out.println("2. Binary Search");
@@ -577,6 +603,14 @@ public class ConsoleHandler {
         System.out.print("Enter the search query: ");
         String query = scanner.nextLine();
 
+        // Enregistrer l'activité "Search Book" avec le champ de recherche et la requête
+        Activity searchBookActivity = new Activity(
+                user.getUsername(),
+                "Search Book",
+                "Search Field: " + searchField + ", Query: " + query
+        );
+        activityManager.addActivity(searchBookActivity);
+
         List<Book> result;
 
         if (searchType == 1) {
@@ -597,7 +631,6 @@ public class ConsoleHandler {
             }
         }
     }
-
 
     /* ================================================ Methods to sort books =================================== */
 
@@ -788,11 +821,12 @@ public class ConsoleHandler {
         System.out.print("Enter the username of the user to update: ");
         String username = scanner.nextLine();
 
-
         try {
+            // Récupérer l'utilisateur par son nom d'utilisateur
             User user = userService.getUserByUsername(username);
             System.out.println("Current details: " + user);
 
+            // Demander les nouveaux détails
             System.out.print("Enter new full name (leave blank to keep current): ");
             String fullName = scanner.nextLine();
             if (!fullName.isEmpty()) user.setFullName(fullName);
@@ -813,12 +847,23 @@ public class ConsoleHandler {
             String address = scanner.nextLine();
             if (!address.isEmpty()) user.setAddress(address);
 
+            // Mettre à jour l'utilisateur dans le service
             userService.updateUser(user);
+
+            // Enregistrer l'activité "Update User" après la mise à jour
+            Activity updateUserActivity = new Activity(
+                    user.getUsername(),
+                    "Update User",
+                    "Updated information for " + user.getUsername()
+            );
+            activityManager.addActivity(updateUserActivity);
+
             System.out.println("User updated successfully.");
         } catch (IllegalArgumentException e) {
             System.out.println("Error: " + e.getMessage());
         }
     }
+
 
     // Méthode pour supprimer un utilisateur
     private void deleteUser() {
@@ -833,10 +878,22 @@ public class ConsoleHandler {
         }
     }
 
+    // Afficher tous les utilisateurs
     private void displayAllUsers() {
 
         userService.displayAllUsers();
     }
+
+    // Affivher les activités récentes
+    public void displayRecentActivities() {
+        if (activityManager == null) {
+            System.out.println("Activity Manager is not available.");
+            return;
+        }
+        activityManager.displayRecentActivities();
+    }
+
+
 
 
 

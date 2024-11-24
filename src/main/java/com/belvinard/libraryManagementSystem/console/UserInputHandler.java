@@ -1,11 +1,12 @@
 package com.belvinard.libraryManagementSystem.console;
 
+import com.belvinard.libraryManagementSystem.activity.Activity;
+import com.belvinard.libraryManagementSystem.activity.ActivityManager;
 import com.belvinard.libraryManagementSystem.service.UserService;
 import com.belvinard.libraryManagementSystem.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.Scanner;
 
 /*
@@ -20,13 +21,27 @@ public class UserInputHandler {
     @Autowired
     private UserService userService;
 
-    private Scanner scanner = new Scanner(System.in);
+    private  Scanner scanner = new Scanner(System.in);
+
+    private ActivityManager activityManager;
 
     // Constructeur avec UserService et Scanner
-    public UserInputHandler(UserService userService, Scanner scanner) {
+    public UserInputHandler(UserService userService, ActivityManager activityManager, Scanner scanner) {
+        if (userService == null) {
+            throw new IllegalArgumentException("UserService cannot be null");
+        }
+        if (activityManager == null) {
+            throw new IllegalArgumentException("ActivityManager cannot be null");
+        }
+        if (scanner == null) {
+            throw new IllegalArgumentException("Scanner cannot be null");
+        }
+
         this.userService = userService;
+        this.activityManager = activityManager;
         this.scanner = scanner;
     }
+
 
     // Demander à l'utilisateur de saisir un nom d'utilisateur et un mot de passe pour créer un nouvel utilisateur
     public User createUser(String providedUsername) {
@@ -68,6 +83,14 @@ public class UserInputHandler {
             // Ajouter l'utilisateur à la liste des utilisateurs via UserService
             userService.addUser(newUser);
 
+            // Enregistrer l'activité "Add User"
+            Activity addUserActivity = new Activity(
+                    username,
+                    "Add User",
+                    "A new user was created: " + username
+            );
+            activityManager.addActivity(addUserActivity);
+
             System.out.println("User created successfully!");
             return newUser; // Retourner l'utilisateur créé
         } catch (IllegalArgumentException e) {
@@ -84,8 +107,16 @@ public class UserInputHandler {
         try {
             User user = userService.getUserByUsername(username);
             System.out.println("User details: " + user);
+
+            // Enregistrer l'activité "Get User Details"
+            Activity getUserActivity = new Activity(
+                    username,
+                    "View User Details",
+                    "User details retrieved for: " + username
+            );
+            activityManager.addActivity(getUserActivity);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println("Error retrieving user details: " + e.getMessage());
         }
     }
 
