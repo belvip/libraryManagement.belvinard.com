@@ -23,6 +23,7 @@ public class User {
     private String password;  // Mot de passe
     private String address;
     private List<Loan> borrowedBooksHistory = new ArrayList<>(); // Historique des emprunts
+    @Setter
     private int borrowLimit; // Limite d'emprunts
     private List<Loan> loans;  // Liste des prêts de l'utilisateur
 
@@ -31,6 +32,7 @@ public class User {
         this.username = username;
         this.password = password;
         this.borrowLimit = 5;  // Limite d'emprunt par défaut
+        System.out.println("User created with borrow limit: " + this.borrowLimit); // Pour débogage
         this.borrowedBooksHistory = new ArrayList<>();
     }
 
@@ -65,8 +67,24 @@ public class User {
 
     // Méthode pour vérifier si l'utilisateur a atteint sa limite d'emprunts
     public boolean hasReachedBorrowLimit() {
-        return borrowedBooksHistory.size() >= borrowLimit;
+
+        long activeLoans = borrowedBooksHistory.stream()
+                .filter(loan -> !loan.getReturnStatus().equals("Returned"))
+                .count();
+        return activeLoans >= borrowLimit;
+        /*int activeLoans = 0;
+
+        // Compter uniquement les prêts qui ne sont pas marqués comme "Returned"
+        for (Loan loan : borrowedBooksHistory) {
+            if (!"Returned".equals(loan.getReturnStatus())) {
+                activeLoans++;
+            }
+        }
+
+        // Comparer les prêts actifs avec la limite d'emprunt
+        return activeLoans >= borrowLimit;*/
     }
+
 
     // Validation de la chaîne (non null et non vide)
     private void validateNotNullOrEmpty(String value, String fieldName) {
@@ -160,6 +178,16 @@ public class User {
         this.password = password;
     }
 
+
+    // Méthode pour retourner un livre
+    public void returnBook(Loan loan) {
+        if (borrowedBooksHistory.contains(loan)) {
+            loan.markAsReturned(); // Statut mis à jour
+            borrowedBooksHistory.remove(loan); // Facultatif selon vos besoins
+        } else {
+            System.out.println("Loan not found in history.");
+        }
+    }
 
 
 }

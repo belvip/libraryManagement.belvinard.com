@@ -129,4 +129,8 @@ public class UserService {
     }
 
 
+    public boolean userExists(String username) {
+        return users.containsKey(username); // Vérifie si l'utilisateur est déjà enregistré
+    }
+
 }

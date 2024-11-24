@@ -352,12 +352,12 @@ public class ConsoleHandler {
         String username = scanner.nextLine();
 
         User user = null;
-        int attempts = 3; // Limite le nombre de tentatives
+        int attempts = 3; // Limite de tentatives pour retrouver l'utilisateur
 
         while (attempts > 0) {
             try {
                 user = userService.getUserByUsername(username);
-                break; // Si trouvé, sortir de la boucle
+                break; // Sortir de la boucle si l'utilisateur est trouvé
             } catch (UserNotFoundException e) {
                 System.out.println("User with username " + username + " not found.");
                 attempts--;
@@ -368,47 +368,68 @@ public class ConsoleHandler {
             }
         }
 
+        // Si aucun utilisateur n'est trouvé, permettre d'en créer un nouveau
         if (user == null) {
             System.out.println("User not found after multiple attempts. You can now create a new user.");
-            user = userInputHandler.createUser(username); // Enregistrer un nouvel utilisateur
+            user = userInputHandler.createUser(username); // Création d'un nouvel utilisateur
         }
 
         System.out.print("Enter the ISBN of the book you want to borrow: ");
         String isbn = scanner.nextLine();
 
-        // Utiliser libraryData pour obtenir le livre
+        // Récupérer le livre via la bibliothèque
         Book book = libraryData.getBookByISBN(isbn);
         if (book == null) {
             System.out.println("Error: Book with ISBN " + isbn + " not found.");
             return;
         }
 
+        // Vérifier la disponibilité du livre
         if (!book.isAvailable()) {
             System.out.println("Sorry, the book is currently unavailable for borrowing.");
             return;
         }
 
-        Loan loan = new Loan(book, user, new Date(), calculateReturnDate());
+        // Vérifier si l'utilisateur a atteint la limite d'emprunts
+        if (user.hasReachedBorrowLimit()) {
+            System.out.println("Error: Borrow limit reached.");
+            return;
+        }
+
+        // Créer un nouvel emprunt
+        Loan loan = new Loan(book, user, new Date(), calculateReturnDate()); // UNE SEULE DÉCLARATION ICI
+
+        // Ajouter le prêt à l'historique de l'utilisateur
         user.addLoan(loan);
         System.out.println("Loan added to your history.");
 
-        // Marquer le livre comme emprunté
+        // Marquer le livre comme emprunté et diminuer le nombre de copies disponibles
         book.markAsBorrowed();
         System.out.println("The book has been marked as borrowed.");
 
+        // Afficher l'état actuel de la bibliothèque
         System.out.println("\nCurrent library state:");
         libraryData.getAllBooks().forEach(currentBook -> {
             System.out.println("ISBN: " + currentBook.getISBN() + ", Copies: " + currentBook.getNumberOfCopies());
         });
 
+        // Mettre à jour la base de données et l'historique utilisateur
         try {
-            libraryData.updateBook(book); // Mettre à jour dans la base de données
-            userService.borrowBook(user, book); // Mettre à jour l'historique utilisateur
+            libraryData.updateBook(book); // Mettre à jour le livre dans la bibliothèque
+            userService.borrowBook(user, book); // Mettre à jour l'utilisateur
             System.out.println("Book borrowed successfully.");
         } catch (Exception e) {
             System.err.println("Error occurred while borrowing the book: " + e.getMessage());
         }
+
+        // Vérification et affichage pour le diagnostic
+        System.out.println("Borrowed Books History for " + user.getUsername() + ":");
+        user.getBorrowedBooksHistory().forEach(System.out::println);
+        System.out.println("Active loans: " + user.getBorrowedBooksHistory().stream()
+                .filter(loanItem -> !loanItem.getReturnStatus().equals("Returned"))
+                .count());
     }
+
 
     /* ================================================ Method to RETURN books =================================== */
 
@@ -455,6 +476,12 @@ public class ConsoleHandler {
             System.out.println("Error: This book was not borrowed by this user.");
             return;
         }
+
+        // Marquer le prêt comme retourné
+        loan.markAsReturned();
+
+        // Supprimer le prêt de l'historique, ou le garder avec le statut mis à jour
+        user.returnBook(loan);
 
         // Marquer le livre comme retourné
         book.markAsReturned();
@@ -658,11 +685,17 @@ public class ConsoleHandler {
 
     // Méthode pour ajouter un utilisateur
     private void addUser() {
-        try{
+        try {
             System.out.println("Enter user details:");
 
             System.out.print("Username: ");
             String username = scanner.nextLine();
+
+            // Vérification si l'utilisateur existe déjà
+            if (userService.userExists(username)) {
+                System.out.println("Error: A user with this username already exists.");
+                return;
+            }
 
             System.out.print("Full Name: ");
             String fullName = scanner.nextLine();
@@ -670,30 +703,35 @@ public class ConsoleHandler {
             System.out.print("Email: ");
             String email = scanner.nextLine();
 
-            System.out.print("PassWord(e.g : MyPass@k48) : ");
-            String passWord = scanner.nextLine();
+            System.out.print("Password (e.g., MyPass@k48): ");
+            String password = scanner.nextLine();
 
-            System.out.print("Phone Number(e.g : +237696190755) : ");
+            System.out.print("Phone Number (e.g., +237696190755): ");
             String phoneNumber = scanner.nextLine();
 
-            System.out.print("Address( e.g : douala) : ");
+            System.out.print("Address (e.g., Douala): ");
             String address = scanner.nextLine();
 
-            User newUser = new User();
-            newUser.setUsername(username);
+            // Créer un utilisateur avec les détails saisis
+            User newUser = new User(username, password); // Constructeur initialisant le borrowLimit
             newUser.setFullName(fullName);
             newUser.setEmail(email);
-            newUser.setPassword(passWord);
             newUser.setPhoneNumber(phoneNumber);
             newUser.setAddress(address);
 
+            System.out.println("Setting default borrow limit to: " + newUser.getBorrowLimit()); // Débogage
+
             // Ajouter l'utilisateur via le service
             userService.addUser(newUser);
-            System.out.println("User added successfully.");
-        }catch (IllegalArgumentException e){
-            System.out.println("Error : " + e.getMessage());
+
+            System.out.println("User added successfully with borrow limit: " + newUser.getBorrowLimit());
+        } catch (IllegalArgumentException e) {
+            System.out.println("Error: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("An unexpected error occurred: " + e.getMessage());
         }
     }
+
 
     // Méthode pour afficher un utilisateur
     private void displayUser() {

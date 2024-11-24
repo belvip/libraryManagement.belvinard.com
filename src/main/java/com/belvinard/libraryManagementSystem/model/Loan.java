@@ -83,7 +83,7 @@ public class Loan {
         return sdf.format(date);
     }
 
-    private String getReturnStatus() {
+    public String getReturnStatus() {
         if (returnDate == null) {
             return "No return date set";
         }
@@ -101,8 +101,26 @@ public class Loan {
         }
     }
 
+    // Exemple de méthode pour mettre à jour automatiquement le statut
     public void updateReturnStatus() {
-        this.returnStatus = "Returned";  // Mise à jour du statut basé sur la date de retour
+        if (returnDate == null) {
+            this.returnStatus = "No return date set";
+            return;
+        }
+
+        Date currentDate = new Date();
+
+        if (currentDate.after(returnDate)) {
+            this.returnStatus = "Returned late"; // Retour en retard
+        } else {
+            this.returnStatus = "Returned"; // Retour à temps
+        }
     }
+
+
+    public void markAsReturned() {
+        this.returnStatus = "Returned"; // Statut explicite
+    }
+
 
 }
