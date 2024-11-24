@@ -739,10 +739,10 @@ public class ConsoleHandler {
         String username = scanner.nextLine();
 
         try {
-            // Tente de récupérer l'utilisateur en fonction du nom d'utilisateur
+            // Récupérer l'utilisateur
             User user = userService.getUserByUsername(username);
 
-            // Affichage des détails de l'utilisateur si trouvé
+            // Afficher les détails de l'utilisateur
             System.out.println("\nUser details:");
             System.out.println("Username: " + user.getUsername());
             System.out.println("Full Name: " + user.getFullName());
@@ -752,29 +752,35 @@ public class ConsoleHandler {
             System.out.println("Address: " + user.getAddress());
             System.out.println("Borrow Limit: " + user.getBorrowLimit());
             System.out.println("Borrowed Books History: ");
-            for (Loan loan : user.getBorrowedBooksHistory()) {
-                System.out.println(loan);
-            }
 
-        } catch (UserNotFoundException e) {
-            // Gestion de l'exception spécifique UserNotFoundException
-            System.out.println("Error: User with username '" + username + "' not found.");
-
-            // Optionnel : demander à l'utilisateur de réessayer
-            System.out.print("Would you like to try again? (y/n): ");
-            String choice = scanner.nextLine();
-            if (choice.equalsIgnoreCase("y")) {
-                displayUser(); // Rappeler la méthode si l'utilisateur veut réessayer
+            // Mettre à jour dynamiquement les statuts des prêts avant de les afficher
+            List<Loan> borrowedBooksHistory = user.getBorrowedBooksHistory();
+            if (borrowedBooksHistory.isEmpty()) {
+                System.out.println("No books borrowed.");
             } else {
-                System.out.println("Returning to the main menu...");
+                for (Loan loan : borrowedBooksHistory) {
+                    loan.updateReturnStatus(); // Mise à jour du statut du prêt
+                    System.out.println(loan);
+                }
             }
-
+        } catch (UserNotFoundException e) {
+            System.out.println("Error: User with username '" + username + "' not found.");
+            promptRetryDisplayUser();
         } catch (Exception e) {
-            // Gestion des autres exceptions inattendues
             System.out.println("An unexpected error occurred: " + e.getMessage());
         }
     }
 
+    // Méthode auxiliaire pour demander si l'utilisateur veut réessayer
+    private void promptRetryDisplayUser() {
+        System.out.print("Would you like to try again? (y/n): ");
+        String choice = scanner.nextLine();
+        if (choice.equalsIgnoreCase("y")) {
+            displayUser();
+        } else {
+            System.out.println("Returning to the main menu...");
+        }
+    }
 
 
     // Méthode pour mettre à jour un utilisateur
@@ -828,6 +834,7 @@ public class ConsoleHandler {
     }
 
     private void displayAllUsers() {
+
         userService.displayAllUsers();
     }
 
