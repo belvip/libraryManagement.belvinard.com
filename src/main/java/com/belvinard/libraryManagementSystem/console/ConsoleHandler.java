@@ -33,6 +33,10 @@ public class ConsoleHandler {
     private Scanner scanner = new Scanner(System.in);
 
     private final ActivityManager activityManager;
+    private User user; // Utilisateur actuellement connecté
+    private User currentUser; // Stocke l'utilisateur actuellement connecté
+
+
 
 
     @Autowired
@@ -44,6 +48,7 @@ public class ConsoleHandler {
         this.userInputHandler = userInputHandler;
         this.bookService = bookService;
         this.activityManager = activityManager;
+        this.currentUser = null; // Initialise avec aucun utilisateur connecté
 
     }
 
@@ -62,48 +67,51 @@ public class ConsoleHandler {
 
             switch (choice) {
                 case 1:
-                    addBook();
+                     loginUser();  // Appeler la méthode pour connecter l'utilisateur;
                     break;
                 case 2:
-                    displayAllBooks();
+                    addBook();
                     break;
                 case 3:
-                    updateBook();
+                    displayAllBooks();
                     break;
                 case 4:
-                    removeBookByISBN();
+                    updateBook();
                     break;
                 case 5:
-                    searchBooks();
+                    removeBookByISBN();
                     break;
                 case 6:
-                    sortBooks();
+                    searchBooks();
                     break;
                 case 7:
-                    addUser();  // Ajouter un utilisateur
+                    sortBooks();
                     break;
                 case 8:
-                    displayUser();  // Afficher un utilisateur
+                    addUser();  // Ajouter un utilisateur
                     break;
                 case 9:
-                    updateUser();  // Mettre à jour un utilisateur
+                    displayUser();  // Afficher un utilisateur
                     break;
                 case 10:
-                    displayAllUsers();
+                    updateUser();  // Mettre à jour un utilisateur
                     break;
                 case 11:
-                    deleteUser();  // Supprimer un utilisateur
+                    displayAllUsers();
                     break;
                 case 12:
-                    borrowBook();  // Emprunter un livre
+                    deleteUser();  // Supprimer un utilisateur
                     break;
                 case 13:
-                    returnBook();  // Emprunter un livre
+                    borrowBook();  // Emprunter un livre
                     break;
                 case 14:
-                    displayRecentActivities();  // Afficher les activités récentes
+                    returnBook();  // Emprunter un livre
                     break;
                 case 15:
+                    displayRecentActivities();  // Afficher les activités récentes
+                    break;
+                case 16:
                     running = false;
                     System.out.println("Exiting the system...");
                     break;
@@ -128,27 +136,60 @@ public class ConsoleHandler {
     private void displayMenu() {
         System.out.println("\n----- The Library Management System Portal -----");
         System.out.println(
-                "\nPress 1 for Adding Book \n" +
-                        "Press 2 for Displaying All Books \n" +
-                        "Press 3 for Updating Book \n" +
-                        "Press 4 for Removing Book \n" +
-                        "Press 5 for Searching Book \n" +
-                        "Press 6 for Sorting Book \n" +
-                        "Press 7 for Adding User \n" +
-                        "Press 8 for Displaying User \n" +
-                        "Press 9 for Updating Users \n" +
-                        "Press 10 for Displaying All Users \n" +
-                        "Press 11 for Deleting User \n" +
-                        "Press 12 for Borrowing Book \n" +
-                        "Press 13 for Returning Book \n" +
-                        "Press 14 for Displaying Resents Activities \n" +
-                        "Press 15 for Exiting the portal\n"
+                "\nPress 1 for Logging in before adding Book \n" +
+                        "Press 2 for Adding a Book \n" +
+                        "Press 3 for Displaying All Books \n" +
+                        "Press 4 for Updating Book \n" +
+                        "Press 5 for Removing Book \n" +
+                        "Press 6 for Searching Book \n" +
+                        "Press 7 for Sorting Book \n" +
+                        "Press 8 for Adding User \n" +
+                        "Press 9 for Displaying User \n" +
+                        "Press 10 for Updating Users \n" +
+                        "Press 11 for Displaying All Users \n" +
+                        "Press 12 for Deleting User \n" +
+                        "Press 13 for Borrowing Book \n" +
+                        "Press 14 for Returning Book \n" +
+                        "Press 15 for Displaying Resents Activities \n" +
+                        "Press 16 for Exiting the portal\n"
         );
         System.out.print("Enter your choice: ");
     }
 
+
+    // SE CONNECTER EN TANT QUE Administrateur avant d'ajouter un livre
+    private User loginUser() {
+        System.out.print("Enter username: ");
+        String username = scanner.nextLine();
+
+        System.out.print("Enter password: ");
+        String password = scanner.nextLine();
+
+        try {
+            User user = userService.authenticateUser(username, password);  // Authentifier l'utilisateur
+            System.out.println("Login successful. Welcome, " + user.getUsername() + "!");
+            return user;
+        } catch (UserNotFoundException e) {
+            System.out.println("Error: " + e.getMessage());  // Afficher le message d'erreur spécifique pour l'utilisateur non trouvé
+        } catch (IllegalArgumentException e) {
+            System.out.println("Login failed: " + e.getMessage());  // Afficher un message pour le mot de passe incorrect
+        }
+
+        return null;  // Échec de la connexion, retourner null
+    }
+
     /* ================================================ Method to add book =================================== */
     private void addBook() {
+        // Vérifier si un utilisateur est connecté
+        if (currentUser == null) {  // Vérifier si l'utilisateur est connecté
+            System.out.println("You must be logged in to add a book.");
+            currentUser = loginUser();  // Appeler la méthode de connexion
+            if (currentUser == null) {  // Si l'utilisateur échoue à se connecter
+                System.out.println("Login failed. Returning to the menu.");
+                return;  // Sortir si l'utilisateur échoue à se connecter
+            }
+        }
+
         System.out.print("Enter book title: ");
         String title = scanner.nextLine();
 
@@ -158,16 +199,16 @@ public class ConsoleHandler {
         System.out.print("Enter book genre: ");
         String genre = scanner.nextLine();
 
-        int numberOfCopies = 0;  // Initialiser avec une valeur par défaut
+        int numberOfCopies = 0;
         boolean validCopies = false;
         while (!validCopies) {
             System.out.print("Enter book copies: ");
             try {
-                numberOfCopies = Integer.parseInt(scanner.nextLine());  // Convertir la saisie en entier
+                numberOfCopies = Integer.parseInt(scanner.nextLine());
                 if (numberOfCopies <= 0) {
                     throw new NumberFormatException("Number of copies must be greater than zero.");
                 }
-                validCopies = true;  // Sortir de la boucle si la saisie est valide
+                validCopies = true;
             } catch (NumberFormatException e) {
                 System.out.println("Invalid input. Please enter a valid positive number for the copies.");
             }
@@ -190,32 +231,30 @@ public class ConsoleHandler {
         while (!validYear) {
             System.out.print("Enter publication year: ");
             try {
-                year = scanner.nextInt();  // Attente d'un entier pour l'année
-                scanner.nextLine();  // Consommer la nouvelle ligne restante
+                year = scanner.nextInt();
+                scanner.nextLine(); // Consommer la nouvelle ligne restante
                 validYear = true;
             } catch (InputMismatchException e) {
                 System.out.println("Invalid input. Please enter a valid number for the year.");
-                scanner.nextLine();  // Consommer l'entrée invalide pour éviter la boucle infinie
+                scanner.nextLine(); // Consommer l'entrée invalide pour éviter la boucle infinie
             }
         }
-
-        System.out.println("\n========= Details Book entered : ========== \n");
-        System.out.println("Book Title: " + title);
-        System.out.println("Book Author: " + author);
-        System.out.println("Book Genre: " + genre);
-        System.out.println("Book Copy: " + numberOfCopies);
-        System.out.println("Book ISBN: " + isbn);
-        System.out.println("Book Year: " + year);
 
         try {
             Book book = new Book();
             book.setTitle(title);
             book.setAuthor(author);
             book.setGenre(genre);
-            book.setNumberOfCopies(numberOfCopies);  // Utiliser l'entier validé ici
+            book.setNumberOfCopies(numberOfCopies);
             book.setISBN(isbn);
             book.setPublicationYear(year);
-            bookService.addBook(book);  // Ajouter le livre via le service
+            bookService.addBook(book); // Ajouter le livre via le service
+
+            // Enregistrer l'activité
+            String description = "Added book: " + title + " by " + author + " (ISBN: " + isbn + ")";
+            Activity addBookActivity = new Activity(currentUser.getUsername(), "Add Book", description);
+            activityManager.addActivity(addBookActivity);
+
             System.out.println("Book added successfully.");
         } catch (BookAlreadyExistsException e) {
             System.out.println("Error: A book with ISBN " + isbn + " already exists. Please use a unique ISBN.");
@@ -223,6 +262,7 @@ public class ConsoleHandler {
             System.out.println("Error: " + e.getMessage());
         }
     }
+
 
     @Override
     public boolean equals(Object obj) {

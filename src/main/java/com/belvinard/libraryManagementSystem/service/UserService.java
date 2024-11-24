@@ -64,15 +64,22 @@ public class UserService {
     }
 
 
-
     // Récupérer un utilisateur par son nom d'utilisateur
-    public User getUserByUsername(String username) throws UserNotFoundException {
+    /*public User getUserByUsername(String username) throws UserNotFoundException {
         User user = users.get(username); // Supposons que `users` soit une map contenant tous les utilisateurs
         if (user == null) {
             throw new UserNotFoundException("User with username " + username + " not found.");
         }
         return user;
+    }*/
+
+    public User getUserByUsername(String username) throws UserNotFoundException {
+        if (!users.containsKey(username)) {
+            throw new UserNotFoundException("User with username " + username + " not found.");
+        }
+        return users.get(username);
     }
+
 
 
     // Mettre à jour les informations d'un utilisateur
@@ -132,5 +139,21 @@ public class UserService {
     public boolean userExists(String username) {
         return users.containsKey(username); // Vérifie si l'utilisateur est déjà enregistré
     }
+
+    public User authenticateUser(String username, String password) {
+        User user = getUserByUsername(username); // Vérifie si l'utilisateur existe
+        if (user == null) {  // Ce check est redondant car getUserByUsername lance déjà l'exception UserNotFoundException.
+            throw new UserNotFoundException("User with username " + username + " not found.");
+        }
+
+        if (!user.getPassword().equals(password)) {
+            throw new IllegalArgumentException("Invalid password.");
+        }
+
+        return user;
+    }
+
+
+
 
 }
