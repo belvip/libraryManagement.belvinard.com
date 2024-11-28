@@ -10,9 +10,9 @@ import org.springframework.stereotype.Component;
 import java.util.Scanner;
 
 /*
-* La classe UserInputHandler dans votre projet semble être responsable de la gestion de l'interaction entre
-* l'utilisateur et l'application en ce qui concerne les opérations liées à un utilisateur
-*
+ * La classe UserInputHandler dans votre projet semble être responsable de la gestion de l'interaction entre
+ * l'utilisateur et l'application en ce qui concerne les opérations liées à un utilisateur
+ *
  */
 
 @Component

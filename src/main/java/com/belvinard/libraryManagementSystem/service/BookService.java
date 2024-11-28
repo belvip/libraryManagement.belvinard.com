@@ -1,3 +1,4 @@
+
 package com.belvinard.libraryManagementSystem.service;
 
 import com.belvinard.libraryManagementSystem.data.LibraryData;
@@ -39,6 +40,14 @@ public class BookService {
                 throw new IllegalArgumentException("Error: No copies available.");
             }
 
+            // Vérifier si un livre avec le même ISBN existe déjà
+            for (Book existingBook : libraryData.getAllBooks()) {
+                if (existingBook.getISBN().equals(book.getISBN())) {
+                    logger.error("A book with ISBN {} already exists.", book.getISBN());
+                    throw new BookAlreadyExistsException("A book with ISBN " + book.getISBN() + " already exists.");
+                }
+            }
+
             // Appel à la méthode d'ajout de livre dans LibraryData
             libraryData.addBook(book);
 
@@ -63,38 +72,35 @@ public class BookService {
     /* ===================================== Method to update book  ===================================== */
     public void updateBook(Book updatedBook) {
         try {
-            // Vérifier que le livre et l'ISBN ne sont pas nuls
-            if (updatedBook == null || updatedBook.getISBN() == null) {
+            if (updatedBook == null || updatedBook.getISBN() == null || updatedBook.getISBN().trim().isEmpty()) {
                 throw new IllegalArgumentException("Book or ISBN cannot be null");
             }
 
-            // Trouver le livre avec l'ISBN correspondant
-            boolean bookUpdated = false;
-            for (int i = 0; i < books.size(); i++) {
-                Book existingBook = books.get(i);
-                if (existingBook.getISBN().equals(updatedBook.getISBN())) {
-                    // Si un livre avec le même ISBN est trouvé, le mettre à jour
-                    books.set(i, updatedBook);
-                    bookUpdated = true;
-                    break; // Sortir de la boucle une fois le livre mis à jour
-                }
-            }
+            // Récupérer le livre existant via LibraryData
+            Book existingBook = libraryData.getBookByISBN(updatedBook.getISBN());
 
-            // Si aucun livre n'a été trouvé, on peut soit lancer une exception, soit l'ajouter
-            if (!bookUpdated) {
-                throw new IllegalArgumentException("Book with ISBN " + updatedBook.getISBN() + " not found");
-            }
+            // Mettre à jour uniquement les champs modifiés
+            if (updatedBook.getTitle() != null) existingBook.setTitle(updatedBook.getTitle());
+            if (updatedBook.getAuthor() != null) existingBook.setAuthor(updatedBook.getAuthor());
+            if (updatedBook.getGenre() != null) existingBook.setGenre(updatedBook.getGenre());
+            if (updatedBook.getNumberOfCopies() > 0) existingBook.setNumberOfCopies(updatedBook.getNumberOfCopies());
+            if (updatedBook.getPublicationYear() > 0) existingBook.setPublicationYear(updatedBook.getPublicationYear());
 
-            // Optionnel: Message confirmant que le livre a été mis à jour
-            System.out.println("Book with ISBN " + updatedBook.getISBN() + " has been updated.");
+            // Sauvegarder les modifications
+            libraryData.updateBook(existingBook);
 
+            logger.info("Book with ISBN {} updated successfully.", updatedBook.getISBN());
+        } catch (BookNotFoundException e) {
+            logger.error("Failed to update book: {}", e.getMessage());
+            throw e;
         } catch (IllegalArgumentException e) {
-            // En cas d'erreur, loggez et relancez l'exception
             logger.error("Failed to update book: {}", e.getMessage());
             throw e;
         }
     }
 
+
+    /* ===================================== Method to get book by ISBN  ===================================== */
     public Book getBookByISBN(String isbn) {
         try {
             return libraryData.getBookByISBN(isbn);
@@ -103,7 +109,6 @@ public class BookService {
             throw e; // Vous pouvez relancer l'exception pour la gérer plus haut
         }
     }
-
 
     /* ===================================== Method to remove book  ===================================== */
 

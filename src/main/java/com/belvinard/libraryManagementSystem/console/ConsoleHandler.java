@@ -6,6 +6,7 @@ import com.belvinard.libraryManagementSystem.activity.Activity;
 import com.belvinard.libraryManagementSystem.activity.ActivityManager;
 import com.belvinard.libraryManagementSystem.data.LibraryData;
 import com.belvinard.libraryManagementSystem.exception.BookAlreadyExistsException;
+import com.belvinard.libraryManagementSystem.exception.BookNotFoundException;
 import com.belvinard.libraryManagementSystem.exception.UserNotFoundException;
 import com.belvinard.libraryManagementSystem.model.Book;
 import com.belvinard.libraryManagementSystem.model.Loan;
@@ -67,7 +68,7 @@ public class ConsoleHandler {
 
             switch (choice) {
                 case 1:
-                     loginUser();  // Appeler la méthode pour connecter l'utilisateur;
+                    loginUser();  // Appeler la méthode pour connecter l'utilisateur;
                     break;
                 case 2:
                     addBook();
@@ -368,37 +369,44 @@ public class ConsoleHandler {
         System.out.print("Enter the ISBN of the book to update: ");
         String isbn = scanner.nextLine();
 
-        // Vérifiez si le livre existe
         try {
+            // Récupérer le livre existant via BookService
             Book existingBook = bookService.getBookByISBN(isbn);
+
             System.out.println("\nExisting book details:");
             System.out.println(existingBook);
 
+            // Demander les nouvelles valeurs à l'utilisateur
             System.out.print("Enter new title (leave blank to keep current): ");
-            String newTitle = scanner.nextLine();
+            String newTitle = scanner.nextLine().trim();
             System.out.print("Enter new author (leave blank to keep current): ");
-            String newAuthor = scanner.nextLine();
+            String newAuthor = scanner.nextLine().trim();
             System.out.print("Enter new genre (leave blank to keep current): ");
-            String newGenre = scanner.nextLine();
+            String newGenre = scanner.nextLine().trim();
+            System.out.print("Enter new number of copies (enter 0 to keep current): ");
+            int newNumberOfCopies = scanner.nextInt();
             System.out.print("Enter new publication year (enter 0 to keep current): ");
             int newYear = scanner.nextInt();
             scanner.nextLine(); // Consommer la ligne restante
 
-            // Mettez à jour uniquement les champs modifiés
+            // Mettre à jour uniquement les champs modifiés
             if (!newTitle.isEmpty()) existingBook.setTitle(newTitle);
             if (!newAuthor.isEmpty()) existingBook.setAuthor(newAuthor);
             if (!newGenre.isEmpty()) existingBook.setGenre(newGenre);
-            if (newYear != 0) existingBook.setPublicationYear(newYear);
+            if (newNumberOfCopies > 0) existingBook.setNumberOfCopies(newNumberOfCopies);
+            if (newYear > 0) existingBook.setPublicationYear(newYear);
 
-            // Appeler la méthode de mise à jour
+            // Appeler la mise à jour via BookService
             bookService.updateBook(existingBook);
+
             System.out.println("Book updated successfully.");
+        } catch (BookNotFoundException e) {
+            System.out.println("Error: " + e.getMessage());
         } catch (IllegalArgumentException e) {
             System.out.println("Error: " + e.getMessage());
         }
-
-
     }
+
 
     // ***************************** BORROW BOOK
     // Méthode pour emprunter un livre

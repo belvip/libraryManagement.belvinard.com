@@ -1,6 +1,7 @@
 package com.belvinard.libraryManagementSystem.data;
 
 import com.belvinard.libraryManagementSystem.exception.BookAlreadyExistsException;
+import com.belvinard.libraryManagementSystem.exception.BookNotFoundException;
 import com.belvinard.libraryManagementSystem.model.Book;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,21 +82,10 @@ public class LibraryData {
     }
 
 
-    /**
-     * Récupère tous les livres de la collection.
-     *
-     * @return une collection de tous les livres
-     */
     public Collection<Book> getAllBooks() {
         return bookCollection.values();
     }
 
-    /**
-     * Recherche un livre par son ISBN.
-     *
-     * @param isbn l'ISBN du livre à rechercher
-     * @return le livre trouvé ou null si non trouvé
-     */
     public Book getBookByISBN(String isbn) {
         if (isbn == null || isbn.isEmpty()) {
             throw new IllegalArgumentException("ISBN cannot be null or empty.");
@@ -104,26 +94,25 @@ public class LibraryData {
         return bookCollection.get(isbn);
     }
 
-    /**
-     * Met à jour un livre dans la collection.
-     *
-     *
-     */
-    public void updateBook(Book book) {
-        if (bookCollection.containsKey(book.getISBN())) {
-            bookCollection.put(book.getISBN(), book);
-            System.out.println("Book with ISBN " + book.getISBN() + " updated successfully.");
-        } else {
-            throw new IllegalArgumentException("Book with ISBN " + book.getISBN() + " does not exist.");
+
+    public void updateBook(Book updatedBook) {
+        if (updatedBook == null || updatedBook.getISBN() == null) {
+            throw new IllegalArgumentException("Book or ISBN cannot be null.");
         }
+
+        if (!bookCollection.containsKey(updatedBook.getISBN())) {
+            throw new BookNotFoundException("Book with ISBN " + updatedBook.getISBN() + " not found.");
+        }
+
+        // Remplacer l'ancien livre par le nouveau dans la collection
+        bookCollection.put(updatedBook.getISBN(), updatedBook);
+
+        logger.info("Book with ISBN {} updated in the collection.", updatedBook.getISBN());
     }
 
-    /**
-     * Supprime un livre de la collection par son ISBN.
-     *
-     * @param isbn l'ISBN du livre à supprimer
-     * @return le livre supprimé
-     */
+
+
+
     public Book deleteBookByISBN(String isbn) {
         if (isbn == null || isbn.isEmpty()) {
             throw new IllegalArgumentException("ISBN cannot be null or empty.");
