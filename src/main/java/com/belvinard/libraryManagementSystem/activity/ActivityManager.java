@@ -7,6 +7,7 @@ import java.util.Stack;
 public class ActivityManager {
     private Stack<Activity> activityStack = new Stack<>();
     private final int MAX_CAPACITY = 10; // Nombre maximal d'activités à conserver
+    //private ActivityManager activityManager = new ActivityManager();
 
     // Ajouter une activité à la pile
     public void addActivity(Activity activity) {

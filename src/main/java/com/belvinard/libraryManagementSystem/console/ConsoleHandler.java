@@ -1,5 +1,6 @@
 
 
+
 package com.belvinard.libraryManagementSystem.console;
 
 import com.belvinard.libraryManagementSystem.activity.Activity;
@@ -389,6 +390,13 @@ public class ConsoleHandler {
             int newYear = scanner.nextInt();
             scanner.nextLine(); // Consommer la ligne restante
 
+            // Conserver les anciennes valeurs pour l'activité
+            String oldTitle = existingBook.getTitle();
+            String oldAuthor = existingBook.getAuthor();
+            String oldGenre = existingBook.getGenre();
+            int oldNumberOfCopies = existingBook.getNumberOfCopies();
+            int oldYear = existingBook.getPublicationYear();
+
             // Mettre à jour uniquement les champs modifiés
             if (!newTitle.isEmpty()) existingBook.setTitle(newTitle);
             if (!newAuthor.isEmpty()) existingBook.setAuthor(newAuthor);
@@ -400,13 +408,30 @@ public class ConsoleHandler {
             bookService.updateBook(existingBook);
 
             System.out.println("Book updated successfully.");
+
+            // Enregistrer l'activité de mise à jour
+            String description = String.format(
+                    "Updated book with ISBN: %s. Changes: [Title: '%s' -> '%s', Author: '%s' -> '%s', Genre: '%s' -> '%s', Copies: %d -> %d, Year: %d -> %d]",
+                    isbn,
+                    oldTitle, existingBook.getTitle(),
+                    oldAuthor, existingBook.getAuthor(),
+                    oldGenre, existingBook.getGenre(),
+                    oldNumberOfCopies, existingBook.getNumberOfCopies(),
+                    oldYear, existingBook.getPublicationYear()
+            );
+
+            Activity updateActivity = new Activity("System", "Update Book", description);
+            activityManager.addActivity(updateActivity);
+
+            // Afficher les activités récentes
+            activityManager.displayRecentActivities();
+
         } catch (BookNotFoundException e) {
             System.out.println("Error: " + e.getMessage());
         } catch (IllegalArgumentException e) {
             System.out.println("Error: " + e.getMessage());
         }
     }
-
 
     // ***************************** BORROW BOOK
     // Méthode pour emprunter un livre
@@ -480,7 +505,16 @@ public class ConsoleHandler {
         try {
             libraryData.updateBook(book); // Mettre à jour le livre dans la bibliothèque
             userService.borrowBook(user, book); // Mettre à jour l'utilisateur
+
+            // Enregistrer l'activité d'emprunt
+            String description = "Borrowed book: " + book.getTitle() + " (ISBN: " + book.getISBN() + ")";
+            Activity borrowActivity = new Activity(user.getUsername(), "Borrow Book", description);
+            activityManager.addActivity(borrowActivity);
+
             System.out.println("Book borrowed successfully.");
+
+            // Afficher les activités récentes
+            activityManager.displayRecentActivities();
         } catch (Exception e) {
             System.err.println("Error occurred while borrowing the book: " + e.getMessage());
         }
@@ -564,6 +598,14 @@ public class ConsoleHandler {
             libraryData.updateBook(book); // Mettre à jour le livre dans la base de données
             userService.updateUser(user); // Mettre à jour l'historique de l'utilisateur
             System.out.println("Book returned successfully.");
+
+            // Enregistrer l'activité de retour
+            String description = "Returned book: " + book.getTitle() + " (ISBN: " + book.getISBN() + ")";
+            Activity returnActivity = new Activity(user.getUsername(), "Return Book", description);
+            activityManager.addActivity(returnActivity);
+
+            // Afficher les activités récentes
+            activityManager.displayRecentActivities();
         } catch (Exception e) {
             System.err.println("Error occurred while returning the book: " + e.getMessage());
         }
@@ -594,8 +636,15 @@ public class ConsoleHandler {
                 System.out.println("The book was not removed.");
             }
 
+            // enregistrer l'activité de suppression
+            String description = "Returned book " + book.getTitle() + " ISBN: " + book.getISBN() + ")";
+            Activity removeActivity = new Activity(user.getUsername(), "Remove Book", description);
+            activityManager.addActivity(removeActivity);
+
+            // Afficher les activités récentes
+            activityManager.displayRecentActivities();
         } catch (IllegalArgumentException e) {
-            System.out.println("Error: " + e.getMessage());
+            System.out.println("Error occurred while removing the book: " + e.getMessage());
         }
     }
 
@@ -651,7 +700,7 @@ public class ConsoleHandler {
         System.out.print("Enter the search query: ");
         String query = scanner.nextLine();
 
-        // Enregistrer l'activité "Search Book" avec le champ de recherche et la requête
+        // Enregistrer l'activité "Search Book"
         Activity searchBookActivity = new Activity(
                 user.getUsername(),
                 "Search Book",
@@ -678,10 +727,13 @@ public class ConsoleHandler {
                 System.out.println(book);
             }
         }
+
+        // Afficher les activités récentes après la recherche
+        activityManager.displayRecentActivities();
     }
 
-    /* ================================================ Methods to sort books =================================== */
 
+    /* ================================================ Methods to sort books =================================== */
     private void sortBooks() {
         // Choisir le critère de tri
         System.out.println("\nSelect sorting criterion:");
@@ -691,7 +743,7 @@ public class ConsoleHandler {
         System.out.println("4. Sort by Genre");
         System.out.print("Enter your choice: ");
         int criterionChoice = scanner.nextInt();
-        scanner.nextLine();  // Consume newline
+        scanner.nextLine();  // Consommer la ligne restante
 
         // Déterminer le champ de tri
         String sortBy = "";
@@ -721,30 +773,35 @@ public class ConsoleHandler {
         System.out.println("3. QuickSort");
         System.out.print("Enter your choice: ");
         int algorithmChoice = scanner.nextInt();
-        scanner.nextLine();  // Consume newline
+        scanner.nextLine();  // Consommer la ligne restante
 
         // Récupérer les livres depuis le service
         List<Book> books = new ArrayList<>(bookService.getAllBooks());
 
+        String algorithmUsed = "";
         // Appliquer l'algorithme de tri sélectionné
         switch (algorithmChoice) {
             case 1:
                 bookService.bubbleSort(books, sortBy); // Bubble Sort
+                algorithmUsed = "Bubble Sort";
                 break;
             case 2:
                 bookService.selectionSort(books, sortBy); // Selection Sort
+                algorithmUsed = "Selection Sort";
                 break;
             case 3:
                 bookService.quickSort(books, 0, books.size() - 1, sortBy); // Quick Sort
+                algorithmUsed = "QuickSort";
                 break;
             default:
                 System.out.println("Invalid choice. Defaulting to Bubble Sort.");
                 bookService.bubbleSort(books, sortBy); // Bubble Sort par défaut
+                algorithmUsed = "Bubble Sort";
                 break;
         }
 
         // Afficher les livres triés
-        System.out.println("\nBooks sorted by " + sortBy + ":");
+        System.out.println("\nBooks sorted by " + sortBy + " using " + algorithmUsed + ":");
         for (Book book : books) {
             System.out.println(book);
             System.out.println("----------------------------------------");
@@ -752,6 +809,17 @@ public class ConsoleHandler {
 
         // Afficher le nombre total de livres triés
         System.out.println("Total number of books sorted: " + books.size());
+
+        // Enregistrer l'activité "Sort Books"
+        Activity sortBooksActivity = new Activity(
+                user.getUsername(), // Remplacez par le nom d'utilisateur actuel si nécessaire
+                "Sort Books",
+                "Sorted by: " + sortBy + ", Algorithm: " + algorithmUsed + ", Total books: " + books.size()
+        );
+        activityManager.addActivity(sortBooksActivity);
+
+        // Afficher les activités récentes après le tri
+        activityManager.displayRecentActivities();
     }
 
 
@@ -898,15 +966,29 @@ public class ConsoleHandler {
             // Mettre à jour l'utilisateur dans le service
             userService.updateUser(user);
 
-            // Enregistrer l'activité "Update User" après la mise à jour
+            // Enregistrer l'activité "Update User"
+            String detailsUpdated = String.format(
+                    "Full Name: %s, Email: %s, Phone: %s, Address: %s",
+                    !fullName.isEmpty() ? fullName : "Unchanged",
+                    !email.isEmpty() ? email : "Unchanged",
+                    !phoneNumber.isEmpty() ? phoneNumber : "Unchanged",
+                    !address.isEmpty() ? address : "Unchanged"
+            );
+
             Activity updateUserActivity = new Activity(
                     user.getUsername(),
                     "Update User",
-                    "Updated information for " + user.getUsername()
+                    "Updated user details. Changes: " + detailsUpdated
             );
             activityManager.addActivity(updateUserActivity);
 
             System.out.println("User updated successfully.");
+
+            // Afficher les activités récentes après la mise à jour
+            activityManager.displayRecentActivities();
+
+        } catch (UserNotFoundException e) {
+            System.out.println("Error: User not found.");
         } catch (IllegalArgumentException e) {
             System.out.println("Error: " + e.getMessage());
         }
@@ -919,12 +1001,31 @@ public class ConsoleHandler {
         String username = scanner.nextLine();
 
         try {
+            // Récupérer les détails de l'utilisateur avant suppression pour l'activité
+            User user = userService.getUserByUsername(username);
+
+            // Supprimer l'utilisateur
             userService.deleteUser(username);
             System.out.println("User deleted successfully.");
+
+            // Enregistrer l'activité "Delete User"
+            Activity deleteUserActivity = new Activity(
+                    user.getUsername(),
+                    "Delete User",
+                    "Deleted user with username: " + username
+            );
+            activityManager.addActivity(deleteUserActivity);
+
+            // Afficher les activités récentes
+            activityManager.displayRecentActivities();
+
+        } catch (UserNotFoundException e) {
+            System.out.println("Error: User not found.");
         } catch (IllegalArgumentException e) {
             System.out.println("Error: " + e.getMessage());
         }
     }
+
 
     // Afficher tous les utilisateurs
     private void displayAllUsers() {
