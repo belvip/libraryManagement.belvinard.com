@@ -619,7 +619,16 @@ public class ConsoleHandler {
         System.out.print("Enter the ISBN of the book to remove: ");
         String isbn = scanner.nextLine();
 
+        User user = null;  // Variable pour stocker l'utilisateur actuel
+
         try {
+            // Demander le nom d'utilisateur pour récupérer l'utilisateur actuel
+            System.out.print("Enter your username: ");
+            String username = scanner.nextLine();
+
+            // Récupérer l'utilisateur par son nom d'utilisateur
+            user = userService.getUserByUsername(username);
+
             // Récupérer le livre à supprimer pour afficher ses détails
             Book book = bookService.getBookByISBN(isbn);
             System.out.println("\nBook details:");
@@ -632,21 +641,27 @@ public class ConsoleHandler {
             if (confirmation.equals("yes")) {
                 bookService.deleteBookByISBN(isbn);
                 System.out.println("The book has been successfully removed.");
+
+                // Enregistrer l'activité de suppression
+                String description = "Removed book " + book.getTitle() + " ISBN: " + book.getISBN();
+                Activity removeActivity = new Activity(user.getUsername(), "Remove Book", description);
+                activityManager.addActivity(removeActivity);
+
+                // Afficher les activités récentes
+                activityManager.displayRecentActivities();
+
             } else {
                 System.out.println("The book was not removed.");
             }
-
-            // enregistrer l'activité de suppression
-            String description = "Returned book " + book.getTitle() + " ISBN: " + book.getISBN() + ")";
-            Activity removeActivity = new Activity(user.getUsername(), "Remove Book", description);
-            activityManager.addActivity(removeActivity);
-
-            // Afficher les activités récentes
-            activityManager.displayRecentActivities();
         } catch (IllegalArgumentException e) {
             System.out.println("Error occurred while removing the book: " + e.getMessage());
+        } catch (UserNotFoundException e) {
+            System.out.println("Error: User not found. Please ensure you are logged in.");
+        } catch (Exception e) {
+            System.out.println("An unexpected error occurred: " + e.getMessage());
         }
     }
+
 
     /* ================================================ Methods to search books =================================== */
 
