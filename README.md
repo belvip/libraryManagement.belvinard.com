@@ -79,7 +79,6 @@ Welcome to the **Library Management System**! This application is designed to ma
 ### Login User 
 ![Login User Operation Screenshot](images/login.png)
 
-[Link to Google](https://www.google.com)
 
 
 ---
@@ -191,7 +190,7 @@ Handles custom exceptions.
 1. **Clone the repository**:
 ```bash
    git clone https://github.com/belvip/libraryManagement.belvinard.com.git
-   cd LibraryManagementSystem
+   cd libraryManagement.belvinard.com
   ```
    
 2. **Build the project:**
