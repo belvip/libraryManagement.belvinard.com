@@ -79,23 +79,27 @@ Welcome to the **Library Management System**! This application is designed to ma
 ### Login User 
 ![Login User Operation Screenshot](images/login.png)
 
+[Link to Google](https://www.google.com)
+
+
 ---
 
 ## Table of Contents 📑
-- [Description](#description)
-- [Features](#features)
-  - [User Management](#user-management)
-  - [Book Management](#book-management)
-  - [Navigation and Search](#navigation-and-search)
-  - [Sorting Functionality](#sorting-functionality)
-  - [Data Structures](#data-structures)
-  - [User Interface](#user-interface)
-  - [Testing](#testing)
-  - [Integration and Scalability](#integration-and-scalability)
-- [Technologies Used](#technologies-used)
-- [Packages Explained](#packages-explained)
-- [Setup Instructions](#setup-instructions)
-- [License](#license)
+- [Description](#description-💬)
+- [Features](#features-🌟)
+  - [User Management 👤](#user-management-👤)
+  - [Book Management 📚](#book-management-📚)
+  - [Navigation and Search 🔎](#navigation-and-search-🔎)
+  - [Sorting Functionality 📊](#sorting-functionality-📊)
+  - [Data Structures 📂](#data-structures-📂)
+  - [User Interface 🖥️](#user-interface-🖥️)
+  - [Testing 🧪](#testing-🧪)
+  - [Integration and Scalability 🔧](#integration-and-scalability-🔧)
+- [Technologies Used](#technologies-used-⚙️)
+- [Packages Explained 📦](#packages-explained-📦)
+- [Setup Instructions ⚡️](#setup-instructions-⚡️)
+- [License 📜](#license-📜)
+
 
 ---
 
