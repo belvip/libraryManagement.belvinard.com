@@ -16,7 +16,9 @@ import com.belvinard.libraryManagementSystem.service.BookService;
 import com.belvinard.libraryManagementSystem.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Component
@@ -53,7 +55,6 @@ public class ConsoleHandler {
         this.currentUser = null; // Initialise avec aucun utilisateur connecté
 
     }
-
 
 
     /*
@@ -137,7 +138,7 @@ public class ConsoleHandler {
 
     /* ^^^^^^^^^^^^^^^^^^^^^^^ Display Menu ^^^^^^^^^^^^^^^^^^^^^^^ */
     private void displayMenu() {
-        System.out.println("\n===================== Library Management System Portal =====================");
+        System.out.println("\n===================== Library Management System Portal (Build with Spring Framework and Java) =====================");
         System.out.println();
 
         System.out.println("Please choose an option by entering the corresponding number:");
@@ -316,10 +317,12 @@ public class ConsoleHandler {
             System.out.println("+-----------------+--------------------------------+------------------------+------------------------------+------------+------------+");
 
             // Afficher les livres
+            // Afficher les livres
             for (Book book : books) {
-                System.out.printf("| %-15s | %-30s | %-22s | %-30s | %-10d | %-10d |\n",
+                System.out.printf("| %-15s | %-30s | %-22s | %-30s | %-10s | %-10d |\n",
                         book.getISBN(), book.getTitle(), book.getAuthor(), book.getGenre(),
-                        book.isAvailable(), book.getNumberOfCopies());
+                        (book.isAvailable() ? "Yes" : "No"),  // Formatage pour afficher "Yes" ou "No" pour la disponibilité
+                        book.getNumberOfCopies());
             }
 
             // Afficher les instructions de navigation et options supplémentaires
@@ -922,7 +925,7 @@ public class ConsoleHandler {
             System.out.print("Phone Number (e.g., +237696790755): ");
             String phoneNumber = scanner.nextLine();
 
-            System.out.print("Address (e.g., Douala): ");
+            System.out.print("Address (e.g., emana): ");
             String address = scanner.nextLine();
 
             // Créer un utilisateur avec les détails saisis
@@ -932,7 +935,7 @@ public class ConsoleHandler {
             newUser.setPhoneNumber(phoneNumber);
             newUser.setAddress(address);
 
-            System.out.println("Setting default borrow limit to: " + newUser.getBorrowLimit()); // Débogage
+            //System.out.println("Setting default borrow limit to: " + newUser.getBorrowLimit()); // Débogage
 
             // Ajouter l'utilisateur via le service
             userService.addUser(newUser);
@@ -947,6 +950,7 @@ public class ConsoleHandler {
 
 
     /* ===================================== Methods to Display Unique User  ===================================== */
+
     private void displayUser() {
         System.out.print("Enter the username to display: ");
         String username = scanner.nextLine();
@@ -955,26 +959,45 @@ public class ConsoleHandler {
             // Récupérer l'utilisateur
             User user = userService.getUserByUsername(username);
 
+            // Hachage du mot de passe avant l'affichage
+            BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+            String hashedPassword = passwordEncoder.encode(user.getPassword());
+
             // Afficher les détails de l'utilisateur
             System.out.println("\nUser details:");
-            System.out.println("Username: " + user.getUsername());
-            System.out.println("Full Name: " + user.getFullName());
-            System.out.println("Email: " + user.getEmail());
-            System.out.println("PassWord: " + user.getPassword());
-            System.out.println("Phone Number: " + user.getPhoneNumber());
-            System.out.println("Address: " + user.getAddress());
-            System.out.println("Borrow Limit: " + user.getBorrowLimit());
-            System.out.println("Borrowed Books History: ");
+            System.out.println("---------------------------------------------------");
+            System.out.printf("%-15s: %s%n", "Username", user.getUsername());
+            System.out.printf("%-15s: %s%n", "Full Name", user.getFullName());
+            System.out.printf("%-15s: %s%n", "Email", user.getEmail());
+            System.out.printf("%-15s: %s%n", "Password", hashedPassword);  // Affichage du mot de passe haché
+            System.out.printf("%-15s: %s%n", "Phone Number", user.getPhoneNumber());
+            System.out.printf("%-15s: %s%n", "Address", user.getAddress());
+            System.out.printf("%-15s: %d%n", "Borrow Limit", user.getBorrowLimit());
+            System.out.println("---------------------------------------------------");
+            System.out.println("Borrowed Books History:");
 
             // Mettre à jour dynamiquement les statuts des prêts avant de les afficher
             List<Loan> borrowedBooksHistory = user.getBorrowedBooksHistory();
             if (borrowedBooksHistory.isEmpty()) {
                 System.out.println("No books borrowed.");
             } else {
+                // Afficher l'en-tête du tableau
+                System.out.println("---------------------------------------------------------------");
+                System.out.printf("%-20s %-15s %-15s %-15s%n", "Book Title", "Loan Date", "Return Date", "Return Status");
+                System.out.println("---------------------------------------------------------------");
+
+                // Afficher chaque prêt
                 for (Loan loan : borrowedBooksHistory) {
                     loan.updateReturnStatus(); // Mise à jour du statut du prêt
-                    System.out.println(loan);
+                    System.out.printf(
+                            "%-20s %-15s %-15s %-15s%n",
+                            loan.getBook().getTitle(),
+                            formatDate(loan.getLoanDate()),
+                            loan.getReturnDate() != null ? formatDate(loan.getReturnDate()) : "Not Returned",
+                            loan.getReturnStatus()
+                    );
                 }
+                System.out.println("---------------------------------------------------------------");
             }
         } catch (UserNotFoundException e) {
             System.out.println("Error: User with username '" + username + "' not found.");
@@ -984,17 +1007,25 @@ public class ConsoleHandler {
         }
     }
 
-    // Méthode auxiliaire pour demander si l'utilisateur veut réessayer
+    // Méthode utilitaire pour formater les dates
+    private String formatDate(Date date) {
+        if (date == null) {
+            return "N/A";
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+        return sdf.format(date);
+    }
+
+
     private void promptRetryDisplayUser() {
-        System.out.print("Would you like to try again? (y/n): ");
-        String choice = scanner.nextLine();
+        System.out.print("\nWould you like to try again? (y/n): ");
+        String choice = scanner.nextLine().trim();
         if (choice.equalsIgnoreCase("y")) {
             displayUser();
         } else {
             System.out.println("Returning to the main menu...");
         }
     }
-    
 
 
     /* ===================================== Methods to Update User ===================================== */

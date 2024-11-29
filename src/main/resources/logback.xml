@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- Appender pour afficher les logs dans la console -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Définir le niveau de logging global -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+    </root>
+
+    <!-- Configurer le logging pour Spring Framework -->
+    <logger name="org.springframework" level="INFO">
+        <appender-ref ref="CONSOLE" />
+    </logger>
+
+</configuration>

@@ -16,6 +16,8 @@ public class Loan {
     @Setter
     @Getter
     private User user;
+    @Getter
+    @Setter
     private Date loanDate;
     // Getter et setter pour la date de retour
     @Setter
