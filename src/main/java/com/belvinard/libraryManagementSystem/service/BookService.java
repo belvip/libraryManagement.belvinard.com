@@ -33,7 +33,7 @@ public class BookService {
     public void addBook(Book book) {
         try {
             // Log pour afficher la valeur du nombre de copies
-            logger.info("Trying to add book with ISBN {}. Number of copies: {}", book.getISBN(), book.getNumberOfCopies());
+            // logger.info("Trying to add book with ISBN {}. Number of copies: {}", book.getISBN(), book.getNumberOfCopies());
 
             // Vérifiez que le nombre de copies est positif avant d'ajouter
             if (book.getNumberOfCopies() <= 0) {
@@ -53,8 +53,8 @@ public class BookService {
             libraryData.addBook(book);
 
             // Log de l'ajout du livre
-            logger.info("Book added successfully: ISBN={} Title={} Author={} Available={}",
-                    book.getISBN(), book.getTitle(), book.getAuthor(), book.isAvailable());
+            logger.info("Book added successfully: ISBN={} Title={} Author={} Available={} Number of copies={}",
+                    book.getISBN(), book.getTitle(), book.getAuthor(), book.isAvailable(), book.getNumberOfCopies());
 
         } catch (BookAlreadyExistsException e) {
             logger.error("Failed to add book: {}", e.getMessage());
@@ -176,23 +176,35 @@ public class BookService {
     // ******************************************* Binary Search
     public List<Book> binarySearchBooks(String query, String searchField) {
         List<Book> books = new ArrayList<>(libraryData.getAllBooks());
-        Comparator<Book> comparator;
 
+        Comparator<Book> comparator;
         switch (searchField.toLowerCase()) {
             case "title":
-                comparator = Comparator.comparing(Book::getTitle, String.CASE_INSENSITIVE_ORDER);
+                comparator = Comparator.comparing(
+                        Book::getTitle,
+                        Comparator.nullsFirst(String.CASE_INSENSITIVE_ORDER)
+                );
                 break;
 
             case "author":
-                comparator = Comparator.comparing(Book::getAuthor, String.CASE_INSENSITIVE_ORDER);
+                comparator = Comparator.comparing(
+                        Book::getAuthor,
+                        Comparator.nullsFirst(String.CASE_INSENSITIVE_ORDER)
+                );
                 break;
 
             case "genre":
-                comparator = Comparator.comparing(Book::getGenre, String.CASE_INSENSITIVE_ORDER);
+                comparator = Comparator.comparing(
+                        Book::getGenre,
+                        Comparator.nullsFirst(String.CASE_INSENSITIVE_ORDER)
+                );
                 break;
 
             case "isbn":
-                comparator = Comparator.comparing(Book::getISBN, String.CASE_INSENSITIVE_ORDER);
+                comparator = Comparator.comparing(
+                        Book::getISBN,
+                        Comparator.nullsFirst(String.CASE_INSENSITIVE_ORDER)
+                );
                 break;
 
             default:
@@ -201,19 +213,33 @@ public class BookService {
 
         books.sort(comparator);
 
-        Book dummyBook = new Book(query);
+        // Créer le livre fictif
+        Book dummyBook = new Book();
+        switch (searchField.toLowerCase()) {
+            case "title":
+                dummyBook.setTitle(query);
+                break;
+            case "author":
+                dummyBook.setAuthor(query);
+                break;
+            case "genre":
+                dummyBook.setGenre(query);
+                break;
+            case "isbn":
+                dummyBook.setISBN(query);
+                break;
+        }
+
+        // Recherche binaire
         int index = Collections.binarySearch(books, dummyBook, comparator);
 
         if (index >= 0) {
-            System.out.println("Number of books found: 1");
             return List.of(books.get(index));
         } else {
-            System.out.println("Number of books found: 0");
             return List.of();
         }
-
-
     }
+
 
     /* ===================================== Methods to Sort book  ===================================== */
 

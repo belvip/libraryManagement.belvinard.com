@@ -38,7 +38,7 @@ public class LibraryData {
             }
 
             // Afficher le nombre de copies juste avant d'ajouter le livre pour débogage
-            logger.info("Number of copies for book with ISBN {}: {}", book.getISBN(), book.getNumberOfCopies());
+            // logger.info("Number of copies for book with ISBN {}: {}", book.getISBN(), book.getNumberOfCopies());
 
             // Vérifier si le livre existe déjà dans la collection
             if (bookCollection.containsKey(book.getISBN())) {
@@ -52,7 +52,7 @@ public class LibraryData {
             bookCollection.put(book.getISBN(), book);
 
             // Log de l'ajout du livre, incluant sa disponibilité
-            logger.info("Book with ISBN {} added successfully. Available={}", book.getISBN(), book.isAvailable());
+            // logger.info("Book with ISBN {} added successfully. Available={}", book.getISBN(), book.isAvailable());
 
         } catch (IllegalArgumentException | BookAlreadyExistsException e) {
             // Gestion des erreurs prévues
@@ -108,7 +108,7 @@ public class LibraryData {
         // Remplacer l'ancien livre par le nouveau dans la collection
         bookCollection.put(updatedBook.getISBN(), updatedBook);
 
-        logger.info("Book with ISBN {} updated in the collection.", updatedBook.getISBN());
+        // logger.info("Book with ISBN {} updated in the collection.", updatedBook.getISBN());
     }
 
 

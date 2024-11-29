@@ -743,7 +743,7 @@ public class ConsoleHandler {
         System.out.println("4. Sort by Genre");
         System.out.print("Enter your choice: ");
         int criterionChoice = scanner.nextInt();
-        scanner.nextLine();  // Consommer la ligne restante
+        scanner.nextLine();  // Consume newline
 
         // Déterminer le champ de tri
         String sortBy = "";
@@ -773,52 +773,48 @@ public class ConsoleHandler {
         System.out.println("3. QuickSort");
         System.out.print("Enter your choice: ");
         int algorithmChoice = scanner.nextInt();
-        scanner.nextLine();  // Consommer la ligne restante
+        scanner.nextLine();  // Consume newline
 
         // Récupérer les livres depuis le service
         List<Book> books = new ArrayList<>(bookService.getAllBooks());
 
         String algorithmUsed = "";
-        // Appliquer l'algorithme de tri sélectionné
         switch (algorithmChoice) {
             case 1:
-                bookService.bubbleSort(books, sortBy); // Bubble Sort
                 algorithmUsed = "Bubble Sort";
+                bookService.bubbleSort(books, sortBy);
                 break;
             case 2:
-                bookService.selectionSort(books, sortBy); // Selection Sort
                 algorithmUsed = "Selection Sort";
+                bookService.selectionSort(books, sortBy);
                 break;
             case 3:
-                bookService.quickSort(books, 0, books.size() - 1, sortBy); // Quick Sort
-                algorithmUsed = "QuickSort";
+                algorithmUsed = "Quick Sort";
+                bookService.quickSort(books, 0, books.size() - 1, sortBy);
                 break;
             default:
-                System.out.println("Invalid choice. Defaulting to Bubble Sort.");
-                bookService.bubbleSort(books, sortBy); // Bubble Sort par défaut
-                algorithmUsed = "Bubble Sort";
+                algorithmUsed = "Bubble Sort (Default)";
+                bookService.bubbleSort(books, sortBy);
                 break;
         }
 
         // Afficher les livres triés
-        System.out.println("\nBooks sorted by " + sortBy + " using " + algorithmUsed + ":");
+        System.out.println("\nBooks sorted by " + sortBy + ":");
         for (Book book : books) {
             System.out.println(book);
             System.out.println("----------------------------------------");
         }
 
-        // Afficher le nombre total de livres triés
         System.out.println("Total number of books sorted: " + books.size());
 
-        // Enregistrer l'activité "Sort Books"
+        // Gestion des activités
+        String username = (user != null) ? user.getUsername() : "Unknown User";
         Activity sortBooksActivity = new Activity(
-                user.getUsername(), // Remplacez par le nom d'utilisateur actuel si nécessaire
+                username,
                 "Sort Books",
                 "Sorted by: " + sortBy + ", Algorithm: " + algorithmUsed + ", Total books: " + books.size()
         );
         activityManager.addActivity(sortBooksActivity);
-
-        // Afficher les activités récentes après le tri
         activityManager.displayRecentActivities();
     }
 
