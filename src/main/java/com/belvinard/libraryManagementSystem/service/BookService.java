@@ -112,7 +112,6 @@ public class BookService {
     }
 
     /* ===================================== Method to remove book  ===================================== */
-
     public Book deleteBookByISBN(String isbn) {
         try {
             Book removedBook = libraryData.deleteBookByISBN(isbn);

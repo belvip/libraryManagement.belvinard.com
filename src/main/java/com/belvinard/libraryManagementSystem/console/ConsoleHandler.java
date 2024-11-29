@@ -57,7 +57,7 @@ public class ConsoleHandler {
 
 
     /*
-     * ============================= Console starts =============================
+     * ============================= CONSOLE =============================
      */
 
     public void start() {
@@ -135,26 +135,36 @@ public class ConsoleHandler {
         }
     }
 
+    /* ^^^^^^^^^^^^^^^^^^^^^^^ Display Menu ^^^^^^^^^^^^^^^^^^^^^^^ */
     private void displayMenu() {
-        System.out.println("\n----- The Library Management System Portal -----");
-        System.out.println(
-                "\nPress 1 for Logging in before adding Book \n" +
-                        "Press 2 for Adding a Book \n" +
-                        "Press 3 for Displaying All Books \n" +
-                        "Press 4 for Updating Book \n" +
-                        "Press 5 for Removing Book \n" +
-                        "Press 6 for Searching Book \n" +
-                        "Press 7 for Sorting Book \n" +
-                        "Press 8 for Adding User \n" +
-                        "Press 9 for Displaying User \n" +
-                        "Press 10 for Updating Users \n" +
-                        "Press 11 for Displaying All Users \n" +
-                        "Press 12 for Deleting User \n" +
-                        "Press 13 for Borrowing Book \n" +
-                        "Press 14 for Returning Book \n" +
-                        "Press 15 for Displaying Resents Activities \n" +
-                        "Press 16 for Exiting the portal\n"
-        );
+        System.out.println("\n===================== Library Management System Portal =====================");
+        System.out.println();
+
+        System.out.println("Please choose an option by entering the corresponding number:");
+        System.out.println("--------------------------------------------------------------");
+
+        // Affichage sous forme de tableau avec une largeur de colonne fixe pour les numéros et les actions
+        System.out.printf("%-5s %-40s\n", "No", "Action");
+        System.out.println("--------------------------------------------------------------");
+
+        System.out.printf("%-5s %-40s\n", "1", "Login before adding a book");
+        System.out.printf("%-5s %-40s\n", "2", "Add a new book");
+        System.out.printf("%-5s %-40s\n", "3", "Display all books");
+        System.out.printf("%-5s %-40s\n", "4", "Update book details");
+        System.out.printf("%-5s %-40s\n", "5", "Remove a book");
+        System.out.printf("%-5s %-40s\n", "6", "Search for a book");
+        System.out.printf("%-5s %-40s\n", "7", "Sort books");
+        System.out.printf("%-5s %-40s\n", "8", "Add a new user");
+        System.out.printf("%-5s %-40s\n", "9", "Display user details");
+        System.out.printf("%-5s %-40s\n", "10", "Update user details");
+        System.out.printf("%-5s %-40s\n", "11", "Display all users");
+        System.out.printf("%-5s %-40s\n", "12", "Delete a user");
+        System.out.printf("%-5s %-40s\n", "13", "Borrow a book");
+        System.out.printf("%-5s %-40s\n", "14", "Return a book");
+        System.out.printf("%-5s %-40s\n", "15", "Display recent activities");
+        System.out.printf("%-5s %-40s\n", "16", "Exit the portal");
+
+        System.out.println("--------------------------------------------------------------");
         System.out.print("Enter your choice: ");
     }
 
@@ -270,10 +280,11 @@ public class ConsoleHandler {
     public boolean equals(Object obj) {
         return super.equals(obj);
     }
+
+
     /* ================================================ Method to display all books =================================== */
 
     private static final int PAGE_SIZE = 5; // Nombre de livres par page
-
     public void displayAllBooks() {
         List<Book> books = bookService.getAllBooks();
 
@@ -295,15 +306,20 @@ public class ConsoleHandler {
             int endIndex = Math.min(startIndex + PAGE_SIZE, totalBooks);
 
             // Afficher les livres de la page actuelle
-            System.out.println("\n================= List of Books =================");
-            System.out.printf("%-15s %-30s %-20s %-15s %-10s %-10s %n",
+            System.out.println("\n=========================== LIST OF BOOKS ===========================");
+            System.out.println();
+
+           // Afficher l'entête du tableau avec une bordure
+            System.out.println("+-----------------+--------------------------------+------------------------+------------------------------+------------+------------+");
+            System.out.printf("| %-15s | %-30s | %-22s | %-30s | %-10s | %-10s |\n",
                     "ISBN", "Title", "Author", "Genre", "Available", "Copies");
-            System.out.println("---------------------------------------------------------------------------------------");
-            for (int i = startIndex; i < endIndex; i++) {
-                Book book = books.get(i);
-                System.out.printf("%-15s %-30s %-20s %-15s %-10s %-10d %n",
+            System.out.println("+-----------------+--------------------------------+------------------------+------------------------------+------------+------------+");
+
+            // Afficher les livres
+            for (Book book : books) {
+                System.out.printf("| %-15s | %-30s | %-22s | %-30s | %-10d | %-10d |\n",
                         book.getISBN(), book.getTitle(), book.getAuthor(), book.getGenre(),
-                        book.isAvailable() ? "Yes" : "No", book.getNumberOfCopies());
+                        book.isAvailable(), book.getNumberOfCopies());
             }
 
             // Afficher les instructions de navigation et options supplémentaires
@@ -349,7 +365,7 @@ public class ConsoleHandler {
         System.out.println("Exiting book display.");
     }
 
-
+    /* ================================================ Method to display with ISBN =================================== */
     // Afficher un livre par son ISBN
     private void displayBookByISBN() {
         System.out.print("Enter the ISBN of the book to display: ");
@@ -367,26 +383,35 @@ public class ConsoleHandler {
 
     /* ================================================ Method to update books =================================== */
     private void updateBook() {
+        System.out.println("\n==================== Update Book ====================");
+
+        // Demander l'ISBN du livre à mettre à jour
         System.out.print("Enter the ISBN of the book to update: ");
-        String isbn = scanner.nextLine();
+        String isbn = scanner.nextLine().trim();
 
         try {
             // Récupérer le livre existant via BookService
             Book existingBook = bookService.getBookByISBN(isbn);
 
-            System.out.println("\nExisting book details:");
-            System.out.println(existingBook);
+            // Afficher les détails actuels du livre
+            System.out.println("\nCurrent Book Details:");
+            System.out.printf("%-15s: %s%n", "Title", existingBook.getTitle());
+            System.out.printf("%-15s: %s%n", "Author", existingBook.getAuthor());
+            System.out.printf("%-15s: %s%n", "Genre", existingBook.getGenre());
+            System.out.printf("%-15s: %d%n", "Copies", existingBook.getNumberOfCopies());
+            System.out.printf("%-15s: %d%n", "Year", existingBook.getPublicationYear());
 
             // Demander les nouvelles valeurs à l'utilisateur
-            System.out.print("Enter new title (leave blank to keep current): ");
+            System.out.println("\nEnter new details (leave blank to keep current):");
+            System.out.print("New Title: ");
             String newTitle = scanner.nextLine().trim();
-            System.out.print("Enter new author (leave blank to keep current): ");
+            System.out.print("New Author: ");
             String newAuthor = scanner.nextLine().trim();
-            System.out.print("Enter new genre (leave blank to keep current): ");
+            System.out.print("New Genre: ");
             String newGenre = scanner.nextLine().trim();
-            System.out.print("Enter new number of copies (enter 0 to keep current): ");
+            System.out.print("New Number of Copies (enter 0 to keep current): ");
             int newNumberOfCopies = scanner.nextInt();
-            System.out.print("Enter new publication year (enter 0 to keep current): ");
+            System.out.print("New Publication Year (enter 0 to keep current): ");
             int newYear = scanner.nextInt();
             scanner.nextLine(); // Consommer la ligne restante
 
@@ -407,7 +432,15 @@ public class ConsoleHandler {
             // Appeler la mise à jour via BookService
             bookService.updateBook(existingBook);
 
-            System.out.println("Book updated successfully.");
+            // Afficher les détails mis à jour
+            System.out.println("\nUpdated Book Details:");
+            System.out.printf("%-15s: %s%n", "Title", existingBook.getTitle());
+            System.out.printf("%-15s: %s%n", "Author", existingBook.getAuthor());
+            System.out.printf("%-15s: %s%n", "Genre", existingBook.getGenre());
+            System.out.printf("%-15s: %d%n", "Copies", existingBook.getNumberOfCopies());
+            System.out.printf("%-15s: %d%n", "Year", existingBook.getPublicationYear());
+
+            System.out.println("\nBook updated successfully!");
 
             // Enregistrer l'activité de mise à jour
             String description = String.format(
@@ -427,14 +460,13 @@ public class ConsoleHandler {
             activityManager.displayRecentActivities();
 
         } catch (BookNotFoundException e) {
-            System.out.println("Error: " + e.getMessage());
+            System.out.println("Error: Book not found with ISBN " + isbn);
         } catch (IllegalArgumentException e) {
             System.out.println("Error: " + e.getMessage());
         }
     }
 
-    // ***************************** BORROW BOOK
-    // Méthode pour emprunter un livre
+    /* ===================================== Methods to Borrow Book  ===================================== */
     private void borrowBook() {
         System.out.print("Enter your username: ");
         String username = scanner.nextLine();
@@ -666,6 +698,9 @@ public class ConsoleHandler {
     /* ================================================ Methods to search books =================================== */
 
     private void searchBooks() {
+        System.out.println("\n==================== Search Books ====================");
+
+        // Demander le nom d'utilisateur
         System.out.print("Enter your username: ");
         String username = scanner.nextLine();
 
@@ -677,45 +712,52 @@ public class ConsoleHandler {
             return;
         }
 
-        System.out.println("Choose search type:");
-        System.out.println("1. Linear Search");
-        System.out.println("2. Binary Search");
+        // Choix du type de recherche
+        System.out.println("\nSelect search type:");
+        System.out.printf("%-5s | %-15s\n", "Option", "Search Type");
+        System.out.println("-----------------------------");
+        System.out.printf("%-5s | %-15s\n", "1", "Linear Search");
+        System.out.printf("%-5s | %-15s\n", "2", "Binary Search");
+        System.out.println("-----------------------------");
         System.out.print("Enter your choice: ");
         int searchType = scanner.nextInt();
         scanner.nextLine(); // Consommer la ligne restante
 
-        System.out.println("Search by:");
-        System.out.println("1. Title");
-        System.out.println("2. Author");
-        System.out.println("3. Genre");
-        System.out.println("4. ISBN");
+        if (searchType != 1 && searchType != 2) {
+            System.out.println("Invalid search type. Returning to menu.");
+            return;
+        }
+
+        // Choix du champ de recherche
+        System.out.println("\nSelect search field:");
+        System.out.printf("%-5s | %-15s\n", "Option", "Field");
+        System.out.println("-----------------------------");
+        System.out.printf("%-5s | %-15s\n", "1", "Title");
+        System.out.printf("%-5s | %-15s\n", "2", "Author");
+        System.out.printf("%-5s | %-15s\n", "3", "Genre");
+        System.out.printf("%-5s | %-15s\n", "4", "ISBN");
+        System.out.println("-----------------------------");
         System.out.print("Enter your choice: ");
         int searchFieldChoice = scanner.nextInt();
         scanner.nextLine(); // Consommer la ligne restante
 
         String searchField;
         switch (searchFieldChoice) {
-            case 1:
-                searchField = "title";
-                break;
-            case 2:
-                searchField = "author";
-                break;
-            case 3:
-                searchField = "genre";
-                break;
-            case 4:
-                searchField = "isbn";
-                break;
-            default:
-                System.out.println("Invalid choice. Returning to menu.");
+            case 1 -> searchField = "title";
+            case 2 -> searchField = "author";
+            case 3 -> searchField = "genre";
+            case 4 -> searchField = "isbn";
+            default -> {
+                System.out.println("Invalid field choice. Returning to menu.");
                 return;
+            }
         }
 
-        System.out.print("Enter the search query: ");
+        // Demander la requête de recherche
+        System.out.print("\nEnter the search query: ");
         String query = scanner.nextLine();
 
-        // Enregistrer l'activité "Search Book"
+        // Enregistrer l'activité de recherche
         Activity searchBookActivity = new Activity(
                 user.getUsername(),
                 "Search Book",
@@ -723,69 +765,72 @@ public class ConsoleHandler {
         );
         activityManager.addActivity(searchBookActivity);
 
+        // Effectuer la recherche
         List<Book> result;
-
         if (searchType == 1) {
             result = bookService.linearSearchBooks(query, searchField);
-        } else if (searchType == 2) {
-            result = bookService.binarySearchBooks(query, searchField);
         } else {
-            System.out.println("Invalid search type. Returning to menu.");
-            return;
+            result = bookService.binarySearchBooks(query, searchField);
         }
 
+        // Afficher les résultats
+        System.out.println("\n==================== Search Results ====================");
         if (result.isEmpty()) {
             System.out.println("No books found matching the query.");
         } else {
-            System.out.println("\nSearch Results:");
+            System.out.printf("%-15s %-30s %-20s %-10s %-15s\n", "ISBN", "Title", "Author", "Year", "Genre");
+            System.out.println("-------------------------------------------------------------------------------");
             for (Book book : result) {
-                System.out.println(book);
+                System.out.printf(
+                        "%-15s %-30s %-20s %-10d %-15s\n",
+                        book.getISBN(), book.getTitle(), book.getAuthor(), book.getPublicationYear(), book.getGenre()
+                );
             }
         }
 
-        // Afficher les activités récentes après la recherche
+        // Afficher les activités récentes
         activityManager.displayRecentActivities();
     }
 
 
     /* ================================================ Methods to sort books =================================== */
     private void sortBooks() {
+        System.out.println("\n==================== Sorting Books ====================");
+
         // Choisir le critère de tri
         System.out.println("\nSelect sorting criterion:");
-        System.out.println("1. Sort by Title");
-        System.out.println("2. Sort by Author");
-        System.out.println("3. Sort by Year");
-        System.out.println("4. Sort by Genre");
+        System.out.printf("%-5s | %-15s\n", "Option", "Criterion");
+        System.out.println("---------------------------");
+        System.out.printf("%-5s | %-15s\n", "1", "Title");
+        System.out.printf("%-5s | %-15s\n", "2", "Author");
+        System.out.printf("%-5s | %-15s\n", "3", "Year");
+        System.out.printf("%-5s | %-15s\n", "4", "Genre");
+        System.out.println("---------------------------");
         System.out.print("Enter your choice: ");
         int criterionChoice = scanner.nextInt();
         scanner.nextLine();  // Consume newline
 
         // Déterminer le champ de tri
-        String sortBy = "";
+        String sortBy;
         switch (criterionChoice) {
-            case 1:
-                sortBy = "title";
-                break;
-            case 2:
-                sortBy = "author";
-                break;
-            case 3:
-                sortBy = "year";
-                break;
-            case 4:
-                sortBy = "genre";
-                break;
-            default:
+            case 1 -> sortBy = "title";
+            case 2 -> sortBy = "author";
+            case 3 -> sortBy = "year";
+            case 4 -> sortBy = "genre";
+            default -> {
                 System.out.println("Invalid choice. Defaulting to Title.");
                 sortBy = "title";
-                break;
+            }
         }
 
         // Choisir l'algorithme de tri
         System.out.println("\nSelect sorting algorithm:");
-        System.out.println("1. Bubble Sort");
-        System.out.println("2. Selection Sort");
-        System.out.println("3. QuickSort");
+        System.out.printf("%-5s | %-20s\n", "Option", "Algorithm");
+        System.out.println("---------------------------------------");
+        System.out.printf("%-5s | %-20s\n", "1", "Bubble Sort");
+        System.out.printf("%-5s | %-20s\n", "2", "Selection Sort");
+        System.out.printf("%-5s | %-20s\n", "3", "QuickSort");
+        System.out.println("---------------------------------------");
         System.out.print("Enter your choice: ");
         int algorithmChoice = scanner.nextInt();
         scanner.nextLine();  // Consume newline
@@ -793,36 +838,42 @@ public class ConsoleHandler {
         // Récupérer les livres depuis le service
         List<Book> books = new ArrayList<>(bookService.getAllBooks());
 
-        String algorithmUsed = "";
+        // Appliquer le tri
+        String algorithmUsed;
         switch (algorithmChoice) {
-            case 1:
+            case 1 -> {
                 algorithmUsed = "Bubble Sort";
                 bookService.bubbleSort(books, sortBy);
-                break;
-            case 2:
+            }
+            case 2 -> {
                 algorithmUsed = "Selection Sort";
                 bookService.selectionSort(books, sortBy);
-                break;
-            case 3:
+            }
+            case 3 -> {
                 algorithmUsed = "Quick Sort";
                 bookService.quickSort(books, 0, books.size() - 1, sortBy);
-                break;
-            default:
+            }
+            default -> {
+                System.out.println("Invalid choice. Defaulting to Bubble Sort.");
                 algorithmUsed = "Bubble Sort (Default)";
                 bookService.bubbleSort(books, sortBy);
-                break;
+            }
         }
 
-        // Afficher les livres triés
-        System.out.println("\nBooks sorted by " + sortBy + ":");
+        // Afficher les résultats
+        System.out.println("\n==================== Sorted Books ====================");
+        System.out.printf("%-15s %-30s %-20s %-10s %-15s\n", "ISBN", "Title", "Author", "Year", "Genre");
+        System.out.println("-------------------------------------------------------------------------------");
         for (Book book : books) {
-            System.out.println(book);
-            System.out.println("----------------------------------------");
+            System.out.printf(
+                    "%-15s %-30s %-20s %-10d %-15s\n",
+                    book.getISBN(), book.getTitle(), book.getAuthor(), book.getPublicationYear(), book.getGenre()
+            );
         }
-
+        System.out.println("-------------------------------------------------------------------------------");
         System.out.println("Total number of books sorted: " + books.size());
 
-        // Gestion des activités
+        // Enregistrer l'activité
         String username = (user != null) ? user.getUsername() : "Unknown User";
         Activity sortBooksActivity = new Activity(
                 username,
@@ -830,6 +881,8 @@ public class ConsoleHandler {
                 "Sorted by: " + sortBy + ", Algorithm: " + algorithmUsed + ", Total books: " + books.size()
         );
         activityManager.addActivity(sortBooksActivity);
+
+        // Afficher les activités récentes
         activityManager.displayRecentActivities();
     }
 
@@ -843,7 +896,7 @@ public class ConsoleHandler {
 
     // ********************** Gérer les utilisateurs
 
-    // Méthode pour ajouter un utilisateur
+    /* ===================================== Methods to Add User  ===================================== */
     private void addUser() {
         try {
             System.out.println("Enter user details:");
@@ -866,7 +919,7 @@ public class ConsoleHandler {
             System.out.print("Password (e.g., MyPass@k48): ");
             String password = scanner.nextLine();
 
-            System.out.print("Phone Number (e.g., +237696190755): ");
+            System.out.print("Phone Number (e.g., +237696790755): ");
             String phoneNumber = scanner.nextLine();
 
             System.out.print("Address (e.g., Douala): ");
@@ -893,7 +946,7 @@ public class ConsoleHandler {
     }
 
 
-    // Méthode pour afficher un utilisateur
+    /* ===================================== Methods to Display Unique User  ===================================== */
     private void displayUser() {
         System.out.print("Enter the username to display: ");
         String username = scanner.nextLine();
@@ -941,8 +994,10 @@ public class ConsoleHandler {
             System.out.println("Returning to the main menu...");
         }
     }
+    
 
 
+    /* ===================================== Methods to Update User ===================================== */
     // Méthode pour mettre à jour un utilisateur
     private void updateUser() {
         System.out.print("Enter the username of the user to update: ");
@@ -951,7 +1006,17 @@ public class ConsoleHandler {
         try {
             // Récupérer l'utilisateur par son nom d'utilisateur
             User user = userService.getUserByUsername(username);
-            System.out.println("Current details: " + user);
+
+            // Récupérer les anciennes valeurs
+            String oldFullName = user.getFullName();
+            String oldEmail = user.getEmail();
+            String oldPassword = user.getPassword();
+            String oldPhoneNumber = user.getPhoneNumber();
+            String oldAddress = user.getAddress();
+
+            // Afficher les détails actuels de l'utilisateur
+            System.out.println("Current details: ");
+            System.out.println(user); // Vous pouvez également afficher ces détails de manière plus personnalisée si besoin.
 
             // Demander les nouveaux détails
             System.out.print("Enter new full name (leave blank to keep current): ");
@@ -977,19 +1042,34 @@ public class ConsoleHandler {
             // Mettre à jour l'utilisateur dans le service
             userService.updateUser(user);
 
-            // Enregistrer l'activité "Update User"
-            String detailsUpdated = String.format(
-                    "Full Name: %s, Email: %s, Phone: %s, Address: %s",
-                    !fullName.isEmpty() ? fullName : "Unchanged",
-                    !email.isEmpty() ? email : "Unchanged",
-                    !phoneNumber.isEmpty() ? phoneNumber : "Unchanged",
-                    !address.isEmpty() ? address : "Unchanged"
-            );
+            // Créer un format de mise à jour plus lisible pour l'utilisateur
+            StringBuilder detailsUpdated = new StringBuilder();
+            detailsUpdated.append("\n=================== User Update Summary ===================\n");
 
+            detailsUpdated.append(String.format("| %-20s | %-30s | %-30s |\n", "Field", "Old Value", "New Value"));
+            detailsUpdated.append("------------------------------------------------------------\n");
+
+            detailsUpdated.append(String.format("| %-20s | %-30s | %-30s |\n", "Full Name", oldFullName,
+                    !fullName.isEmpty() ? fullName : "Unchanged"));
+            detailsUpdated.append(String.format("| %-20s | %-30s | %-30s |\n", "Email", oldEmail,
+                    !email.isEmpty() ? email : "Unchanged"));
+            detailsUpdated.append(String.format("| %-20s | %-30s | %-30s |\n", "Password", oldPassword,
+                    !password.isEmpty() ? password : "Unchanged"));
+            detailsUpdated.append(String.format("| %-20s | %-30s | %-30s |\n", "Phone", oldPhoneNumber,
+                    !phoneNumber.isEmpty() ? phoneNumber : "Unchanged"));
+            detailsUpdated.append(String.format("| %-20s | %-30s | %-30s |\n", "Address", oldAddress,
+                    !address.isEmpty() ? address : "Unchanged"));
+
+            detailsUpdated.append("------------------------------------------------------------\n");
+
+            // Affichage des informations mises à jour
+            System.out.println(detailsUpdated.toString());
+
+            // Enregistrer l'activité de mise à jour de l'utilisateur
             Activity updateUserActivity = new Activity(
                     user.getUsername(),
                     "Update User",
-                    "Updated user details. Changes: " + detailsUpdated
+                    "Updated user details. Changes: " + detailsUpdated.toString()
             );
             activityManager.addActivity(updateUserActivity);
 
@@ -1006,6 +1086,7 @@ public class ConsoleHandler {
     }
 
 
+    /* ===================================== Methods to Delete User  ===================================== */
     // Méthode pour supprimer un utilisateur
     private void deleteUser() {
         System.out.print("Enter the username of the user to delete: ");
@@ -1037,13 +1118,14 @@ public class ConsoleHandler {
         }
     }
 
-
+    /* ===================================== Methods to Display All Users ===================================== */
     // Afficher tous les utilisateurs
     private void displayAllUsers() {
 
         userService.displayAllUsers();
     }
 
+    /* ===================================== Methods to Display Recent Activities  ===================================== */
     // Affivher les activités récentes
     public void displayRecentActivities() {
         if (activityManager == null) {
